@@ -1,6 +1,6 @@
 function App() {
     return (
-        <p>awdawdawd</p>
+        <p className="p-2 bg-cyan-500">yh</p>
     )
 }
 
