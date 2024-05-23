@@ -32,7 +32,12 @@ function App() {
 
     return (
         <div className="flex flex-col gap-3 w-screen h-screen justify-center items-center bg-black text-gray-500">
-            <GameCanvas ref={gc} width={GLOBALS.CANVAS.WIDTH} height={GLOBALS.CANVAS.HEIGHT} framerate={TARGET_FRAMERATE} />
+            <GameCanvas
+                ref={gc}
+                width={GLOBALS.CANVAS.WIDTH}
+                height={GLOBALS.CANVAS.HEIGHT}
+                framerate={TARGET_FRAMERATE}
+            />
 
             {ready !== "ready" ? (
                 <p>...</p>

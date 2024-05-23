@@ -19,9 +19,14 @@ export class Layer {
         this.context.clearRect(0, 0, canvas.width, canvas.height)
         // console.log('[layer] clear ok')
     }
-
     /**
-     * Draw a single Pixel or Block on target layer
+     * Draw a rectangular shape
+     * @param x start X (always px)
+     * @param y start Y (always px)
+     * @param sizeX length of object (default = px, multiplied by BLOCK_SIZE_PX if `block=true`)
+     * @param sizeY same but height
+     * @param color any CSS compatible colorstring
+     * @param block will draw BLOCK_SIZE_PX sized cubes instead of pixels if `true`
      */
     draw(
         x: number,
@@ -32,8 +37,8 @@ export class Layer {
         block: boolean = false,
     ) {
         this.context.fillStyle = color
-        const targetX = block ? x * BLOCK_SIZE_PX : x
-        const targetY = block ? y * BLOCK_SIZE_PX : y
-        this.context.fillRect(targetX, targetY, sizeX, sizeY)
+        const targetX = block ? sizeX * BLOCK_SIZE_PX : sizeX
+        const targetY = block ? sizeY * BLOCK_SIZE_PX : sizeY
+        this.context.fillRect(x, y, targetX, targetY)
     }
 }

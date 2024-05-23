@@ -1,4 +1,4 @@
-import { GLOBALS } from "../game/globals"
+import { SECOND_IN_MS, GLOBALS, MAP_HEIGHT, MAP_WIDTH, BLOCK_SIZE_PX } from "../game/globals"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { Player } from "./Player"
@@ -12,12 +12,10 @@ export class CanvasController {
     private baseContext: CanvasRenderingContext2D | null = null
     private layers: { [key: string]: Layer } = {}
 
-    // framerate, render loop, performance stats
+    // framerate, render loop, fps stats
     private frameDuration: number
     private lastFrameTime: number = 0
     private frameRequestID: number | null = null
-
-    // fps calculation
     private fps: number = 0
     private frameCount: number = 0
     private fpsInterval: number
@@ -29,15 +27,20 @@ export class CanvasController {
 
     constructor(canvas: HTMLCanvasElement | null, targetFps: number = 60) {
         this.baseCanvas = canvas
-        this.frameDuration = 1000 / targetFps
-        this.fpsInterval = 1000 // Update fps every 1000ms (1 second)
-        this.player = new Player({ x: 4, y: 4 })
+        this.frameDuration = SECOND_IN_MS / targetFps
+        this.fpsInterval = SECOND_IN_MS
+        this.player = new Player({ x: 0, y: 300 })
 
         if (this.baseCanvas) {
             this.baseContext = this.baseCanvas.getContext("2d")
-            if (!this.baseContext) throw new Error("Base context is not initialized")
-            this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(this.createLayerContext())
-            this.layers[GLOBALS.LAYERS.FOREGROUND] = new Layer(this.createLayerContext())
+            if (!this.baseContext)
+                throw new Error("Base context is not initialized")
+            this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(
+                this.createLayerContext(),
+            )
+            this.layers[GLOBALS.LAYERS.FOREGROUND] = new Layer(
+                this.createLayerContext(),
+            )
             console.log("[gc controller] init OK")
         }
     }
@@ -57,9 +60,22 @@ export class CanvasController {
     private compositeLayers() {
         // composite the layers onto the base context and draw the final image
         if (this.baseContext) {
-            this.baseContext.clearRect(0, 0, this.baseCanvas!.width, this.baseCanvas!.height)
-            this.baseContext.drawImage(this.layers[GLOBALS.LAYERS.BACKGROUND].getContext().canvas, 0, 0)
-            this.baseContext.drawImage(this.layers[GLOBALS.LAYERS.FOREGROUND].getContext().canvas, 0, 0)
+            this.baseContext.clearRect(
+                0,
+                0,
+                this.baseCanvas!.width,
+                this.baseCanvas!.height,
+            )
+            this.baseContext.drawImage(
+                this.layers[GLOBALS.LAYERS.BACKGROUND].getContext().canvas,
+                0,
+                0,
+            )
+            this.baseContext.drawImage(
+                this.layers[GLOBALS.LAYERS.FOREGROUND].getContext().canvas,
+                0,
+                0,
+            )
         }
     }
 
@@ -67,11 +83,19 @@ export class CanvasController {
         const playerPos = this.player.getPosition()
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
+
+        // Draw platform
+        const PLATFORM_HEIGHT_BLOCKS = 2
+        this.layers[GLOBALS.LAYERS.BACKGROUND].draw(
+            0, (MAP_HEIGHT * BLOCK_SIZE_PX) - (PLATFORM_HEIGHT_BLOCKS * BLOCK_SIZE_PX), MAP_WIDTH, PLATFORM_HEIGHT_BLOCKS, "gray", true
+        )
+
+        // Draw player
         this.layers[GLOBALS.LAYERS.FOREGROUND].draw(
             playerPos.x,
             playerPos.y,
-            24,
-            48,
+            16,
+            32,
             GLOBALS.COLORS.CYAN,
             false,
         )
@@ -94,7 +118,7 @@ export class CanvasController {
         this.frameCount++
         const elapsed = timestamp - this.lastFpsUpdateTime
         if (elapsed >= this.fpsInterval) {
-            this.fps = (this.frameCount / elapsed) * 1000
+            this.fps = (this.frameCount / elapsed) * SECOND_IN_MS
             this.frameCount = 0
             this.lastFpsUpdateTime = timestamp
         }
@@ -127,4 +151,3 @@ export class CanvasController {
         this.player.move(dir)
     }
 }
-
