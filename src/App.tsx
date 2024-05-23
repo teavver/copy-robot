@@ -1,51 +1,67 @@
+import { GLOBALS } from "./game/globals"
 import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"
 import { Status } from "./types/Status"
-import { GLOBALS } from "./game/globals"
 import GameCanvas from "./components/GameCanvas"
 
 function App() {
-
-    const canvasRef = useRef<GameCanvasHandle>(null)
+    const TARGET_FRAMERATE = 60 // 60 =max
+    const gc = useRef<GameCanvasHandle>(null)
     const [ready, setReady] = useState<Status>("loading")
+    const [fps, setFps] = useState<number>(0)
 
     useEffect(() => {
-        if (canvasRef.current) {
+        if (gc.current) {
             setReady("ready")
             return
         }
-    }, [ready, canvasRef, canvasRef.current])
+    }, [ready, gc])
+
+    useEffect(() => {
+        if (gc.current) {
+            const intervalId = setInterval(() => {
+                const currentFPS = gc.current?.getFPS() || 0
+                setFps(currentFPS)
+            }, 1000)
+
+            return () => {
+                clearInterval(intervalId)
+            }
+        }
+    }, [gc])
 
     return (
         <div className="flex flex-col gap-3 w-screen h-screen justify-center items-center bg-black text-gray-500">
+            <GameCanvas ref={gc} width={GLOBALS.CANVAS.WIDTH} height={GLOBALS.CANVAS.HEIGHT} framerate={TARGET_FRAMERATE} />
 
-            <GameCanvas ref={canvasRef} width={500} height={500} />
-
-            {(ready !== "ready")
-                ? <p>...</p>
-                :
+            {ready !== "ready" ? (
+                <p>...</p>
+            ) : (
                 <div className="flex flex-col gap-3">
                     <div className="flex gap-3">
-                        <p>
-                            context:{" "}
-                            {canvasRef.current?.getContext() !== null ? "OK" : "ERR"}
-                        </p>
                         <button
-                            onClick={() =>
-                                canvasRef.current?.drawBlock(2, 2, GLOBALS.COLORS.CYAN)
-                            }
+                            className="select-none focus:outline-none"
+                            onClick={() => gc.current?.startLoop()}
                         >
-                            Draw cyan
+                            Start game loop
                         </button>
-                        <button onClick={() => canvasRef.current?.drawBlock(4, 4)}>
-                            Draw gray
+                        <button
+                            className="select-none focus:outline-none"
+                            onClick={() => gc.current?.stopLoop()}
+                        >
+                            Stop game loop
                         </button>
-                        <button onClick={() => canvasRef.current?.clearCanvas()}>
-                            Clear Canvas
-                        </button>
+                        <p>fps: {fps}</p>
                     </div>
+                    {/* <div className="flex flex-col gap-3"> */}
+                    {/* <p>configuration</p>
+                        <div className="flex gap-3">
+                            <p>target fps:</p>
+                            <input type="number" name="fps" id="fps" value={fps} onChange={(e) => setFps(+e.target.value)} />
+                        </div> */}
+                    {/* </div> */}
                 </div>
-            }
+            )}
         </div>
     )
 }
