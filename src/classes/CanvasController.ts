@@ -130,7 +130,7 @@ export class CanvasController {
     }
 
     movePlayer(dir: Direction) {
-        const PLAYER_MOVE_SPEED = 4
+        const PLAYER_MOVE_SPEED = 2
         this.player.move(dir, PLAYER_MOVE_SPEED)
     }
 

@@ -1,7 +1,15 @@
 import { Model, ModelState } from "./Model"
 import { blockToCanvas } from "../game/utils"
+import { COLLISION_FIELD_SIZE_PX } from "../game/globals"
 import { Position } from "../types/Position"
-import { ObjectShape } from "./Object"
+import { Size } from "../types/Size"
+
+type CollisionContactType = "none" | "close" | "direct"
+
+interface ModelPositionData {
+    pos: Position
+    size: Size
+}
 
 export class Layer {
 
@@ -16,7 +24,6 @@ export class Layer {
         this.activeModels = []
     }
 
-
     private isModelActive(model: Model) {
         return this.activeModels.includes(model)
     }
@@ -27,7 +34,7 @@ export class Layer {
         const { width, height } = this.context.canvas
         const modelSize = blockToCanvas(model.getShape().size)
         const outOfBounds = (
-            model.pos.x + modelSize.width < 20 ||
+            model.pos.x + modelSize.width < 0 ||
             model.pos.x > width ||
             model.pos.y + modelSize.height < 0 ||
             model.pos.y > height
@@ -38,6 +45,23 @@ export class Layer {
             return true
         }
         return false
+    }
+
+    private getActiveModelPositions(): ModelPositionData[] {
+        const posArr: ModelPositionData[] = []
+        this.activeModels.forEach(model => {
+            const posData: ModelPositionData = {
+                pos: model.pos,
+                size: model.getShape().size
+            }
+            posArr.push(posData)
+        })
+        return posArr
+    }
+
+    // detect all models in range from a certain model (radius)
+    private detectNearbyModels(model: Model, activeModelPositions: ModelPositionData[]) {
+
     }
 
     getContext(): CanvasRenderingContext2D {
@@ -77,13 +101,31 @@ export class Layer {
         this.context.fillStyle = shape.texture
         this.context.fillRect(posX, posY, width, height)
         if (model.displayCollision) {
+
+            // draw collision detection field (and center it)
             this.context.strokeStyle = "rgba(255, 255, 0, 1)"
+            this.context.strokeRect((posX - (COLLISION_FIELD_SIZE_PX / 2)),
+                (posY - (COLLISION_FIELD_SIZE_PX / 2)),
+                (width + (COLLISION_FIELD_SIZE_PX)),
+                (height + (COLLISION_FIELD_SIZE_PX)))
+
+            // draw actual model collision rect
+            this.context.strokeStyle = "rgba(255, 0, 0, 1)"
             this.context.strokeRect(posX, posY, width, height)
         }
     }
 
-    simulateGravity() {
+    // Simulate physics for all models that belong to this layer
+    // The flow of physics in this case is: collision -> gravity -> other 
+    simulatePhysics() {
+        // get positions of all objects for this tick
+        const modelPositions = this.getActiveModelPositions()
         this.activeModels.forEach(model => {
+
+            if (model.isMoving) {
+
+            }
+
             model.applyGravity()
         })
     }

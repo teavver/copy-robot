@@ -7,6 +7,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     ({ width, height, framerate }, ref) => {
         const canvasRef = useRef<HTMLCanvasElement>(null)
         const controllerRef = useRef<CanvasController | null>(null)
+        const keysPressed = useRef<Set<string>>(new Set())
 
         useImperativeHandle(
             ref,
@@ -22,26 +23,41 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 console.log("[game canvas] init ctx")
             }
 
-            const handleMovement = (e: KeyboardEvent) => {
-                if (!canvasRef.current) return
-                switch (e.key) {
-                    case "w":
-                        controllerRef.current?.movePlayer(Direction.UP)
-                        break
-                    case "a":
-                        controllerRef.current?.movePlayer(Direction.LEFT)
-                        break
-                    case "s":
-                        controllerRef.current?.movePlayer(Direction.DOWN)
-                        break
-                    case "d":
-                        controllerRef.current?.movePlayer(Direction.RIGHT)
-                        break
-                }
+            const handleKeyDown = (e: KeyboardEvent) => {
+                keysPressed.current.add(e.key)
             }
 
-            window.addEventListener("keydown", handleMovement)
-            return () => window.removeEventListener("keydown", handleMovement)
+            const handleKeyUp = (e: KeyboardEvent) => {
+                keysPressed.current.delete(e.key)
+            }
+
+            const updateMovement = () => {
+                if (!canvasRef.current) return
+
+                if (keysPressed.current.has("w")) {
+                    controllerRef.current?.movePlayer(Direction.UP)
+                }
+                if (keysPressed.current.has("a")) {
+                    controllerRef.current?.movePlayer(Direction.LEFT)
+                }
+                if (keysPressed.current.has("s")) {
+                    controllerRef.current?.movePlayer(Direction.DOWN)
+                }
+                if (keysPressed.current.has("d")) {
+                    controllerRef.current?.movePlayer(Direction.RIGHT)
+                }
+
+                requestAnimationFrame(updateMovement)
+            }
+
+            window.addEventListener("keydown", handleKeyDown)
+            window.addEventListener("keyup", handleKeyUp)
+            requestAnimationFrame(updateMovement)
+
+            return () => {
+                window.removeEventListener("keydown", handleKeyDown)
+                window.removeEventListener("keyup", handleKeyUp)
+            }
         }, [canvasRef, controllerRef, framerate])
 
         return (
@@ -56,3 +72,4 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
 )
 
 export default GameCanvas
+

@@ -58,13 +58,6 @@ function App() {
                         </button>
                         <p>fps: {fps}</p>
                     </div>
-                    {/* <div className="flex flex-col gap-3"> */}
-                    {/* <p>configuration</p>
-                        <div className="flex gap-3">
-                            <p>target fps:</p>
-                            <input type="number" name="fps" id="fps" value={fps} onChange={(e) => setFps(+e.target.value)} />
-                        </div> */}
-                    {/* </div> */}
                 </div>
             )}
         </div>
