@@ -2,20 +2,20 @@ import { Direction } from "../types/Direction";
 import { Position } from "../types/Position";
 import { Object, ObjectShape } from "./Object";
 
-// Model is an extension of a `Shape` - not abstract like Shape,
-// can be drawn and manipulated from a Layer.
+// Model is an extension of a `Shape`
+// contains non-abstract logic and can be drawn and manipulated from a Layer.
 
-// The state holds information about what should be visible when 'drawing'
-// the Model and which frame of current state should be visible
+// The state determines if and what of this model should be drawn
 export enum ModelState {
-    NORMAL,
-    DESTROYED,
+    NORMAL,     // is ok
+    KILLED,     // player destroyed model by shooting at it
+    DESTROYED,  // killed animation is over - model destroyed (should not be visible)
 }
 
 export enum ModelType {
-    PLAYER,
-    ENEMY,
-    TERRAIN
+    PLAYER,     // reserved for player
+    ENEMY,      // this usually means the model is "killable"
+    TERRAIN     // collision on, but not killable
 }
 
 export interface ModelData {

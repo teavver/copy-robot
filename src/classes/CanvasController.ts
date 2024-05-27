@@ -59,9 +59,11 @@ export class CanvasController {
                 throw new Error("Base context is not initialized")
             this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(
                 this.createLayerContext(),
+                "BG"
             )
             this.layers[GLOBALS.LAYERS.FOREGROUND] = new Layer(
                 this.createLayerContext(),
+                "FG"
             )
             console.log("[gc controller] init OK")
         }
@@ -149,6 +151,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(this.player)
         }
     }
 
