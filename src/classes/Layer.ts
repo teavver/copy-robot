@@ -82,4 +82,10 @@ export class Layer {
         }
     }
 
+    simulateGravity() {
+        this.activeModels.forEach(model => {
+            model.applyGravity()
+        })
+    }
+
 }

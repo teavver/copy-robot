@@ -62,6 +62,12 @@ export class Model extends Object {
         }
     }
 
+    applyGravity() {
+        if (this.gravity) {
+            this.pos.y += 4
+        }
+    }
+
     modifyState(newState: ModelState) {
         this.state = newState
     }

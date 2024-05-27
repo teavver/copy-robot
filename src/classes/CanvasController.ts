@@ -25,13 +25,6 @@ export class CanvasController {
     // misc
     private isRunning: boolean = false
 
-
-    // name: string // used for texture resolution
-    // type: ModelType
-    // state: ModelState
-    // gravity: boolean
-    // displayCollision: boolean
-
     // models
     playerModelShape: ObjectShape = {
         size: {
@@ -44,7 +37,7 @@ export class CanvasController {
     player = new Model({
         type: ModelType.PLAYER,
         state: ModelState.NORMAL,
-        gravity: true,
+        gravity: false,
         displayCollision: true
     }, this.playerModelShape, "Player", { x: 200, y: 200 })
 
@@ -108,6 +101,7 @@ export class CanvasController {
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
 
+        this.layers[GLOBALS.LAYERS.FOREGROUND].simulateGravity()
         this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(this.player, this.player.pos.x, this.player.pos.y)
 
         this.compositeLayers()
