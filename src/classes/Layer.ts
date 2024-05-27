@@ -3,6 +3,7 @@ import { blockToCanvas } from "../game/utils"
 import { COLLISION_FIELD_SIZE_PX } from "../game/globals"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
+import { LayerPerformanceStats } from "../types/Performance"
 
 type CollisionContactType = "none" | "close" | "direct"
 
@@ -59,7 +60,24 @@ export class Layer {
         return posArr
     }
 
+    // pretty useful for debugging
+    private getCollisionDetectionRect(model: Model): ModelPositionData {
+        const modelSizePx = blockToCanvas(model.getShape().size)
+        const data: ModelPositionData = {
+            pos: {
+                x: (model.pos.x - (COLLISION_FIELD_SIZE_PX / 2)),
+                y: (model.pos.y - (COLLISION_FIELD_SIZE_PX / 2)),
+            },
+            size: {
+                width: (modelSizePx.width + (COLLISION_FIELD_SIZE_PX)),
+                height: (modelSizePx.height + (COLLISION_FIELD_SIZE_PX))
+            }
+        }
+        return data
+    }
+
     // detect all models in range from a certain model (radius)
+    // will return list of ones that contact with the passed `model` (if any)
     private detectNearbyModels(model: Model, activeModelPositions: ModelPositionData[]) {
 
     }
@@ -87,6 +105,13 @@ export class Layer {
         console.log(`[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`)
     }
 
+    getPerfStats(): LayerPerformanceStats {
+        return {
+            layerName: this.name,
+            activeModels: this.activeModels.map(model => model.name)
+        }
+    }
+
     /**
      * @param posXposY in px
      * @description Will not draw model on canvas if its not active or out of bounds
@@ -104,10 +129,12 @@ export class Layer {
 
             // draw collision detection field (and center it)
             this.context.strokeStyle = "rgba(255, 255, 0, 1)"
-            this.context.strokeRect((posX - (COLLISION_FIELD_SIZE_PX / 2)),
-                (posY - (COLLISION_FIELD_SIZE_PX / 2)),
-                (width + (COLLISION_FIELD_SIZE_PX)),
-                (height + (COLLISION_FIELD_SIZE_PX)))
+            const colR = this.getCollisionDetectionRect(model)
+            this.context.strokeRect(colR.pos.x, colR.pos.y, colR.size.width, colR.size.height)
+            // this.context.strokeRect((posX - (COLLISION_FIELD_SIZE_PX / 2)),
+            //     (posY - (COLLISION_FIELD_SIZE_PX / 2)),
+            //     (width + (COLLISION_FIELD_SIZE_PX)),
+            //     (height + (COLLISION_FIELD_SIZE_PX)))
 
             // draw actual model collision rect
             this.context.strokeStyle = "rgba(255, 0, 0, 1)"
@@ -121,11 +148,8 @@ export class Layer {
         // get positions of all objects for this tick
         const modelPositions = this.getActiveModelPositions()
         this.activeModels.forEach(model => {
-
             if (model.isMoving) {
-
             }
-
             model.applyGravity()
         })
     }

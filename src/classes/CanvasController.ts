@@ -3,6 +3,7 @@ import { Layer } from "./Layer"
 import { ObjectShape } from "./Object"
 import { Model, ModelType, ModelState } from "./Model"
 import { Direction } from "../types/Direction"
+import { PerformanceStats } from "../types/Performance"
 
 export class CanvasController {
     // ctx, layers
@@ -101,7 +102,7 @@ export class CanvasController {
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
 
-        this.layers[GLOBALS.LAYERS.FOREGROUND].simulateGravity()
+        this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
         this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(this.player, this.player.pos.x, this.player.pos.y)
 
         this.compositeLayers()
@@ -130,12 +131,19 @@ export class CanvasController {
     }
 
     movePlayer(dir: Direction) {
+        if (!this.isRunning) return
         const PLAYER_MOVE_SPEED = 2
         this.player.move(dir, PLAYER_MOVE_SPEED)
     }
 
-    getFPS(): number {
-        return parseFloat(this.fps.toFixed(2))
+    getPerfStats(): PerformanceStats {
+        const fps = parseFloat(this.fps.toFixed(2))
+        const bgLayerPerf = this.layers[GLOBALS.LAYERS.BACKGROUND].getPerfStats()
+        const fgLayerPerf = this.layers[GLOBALS.LAYERS.FOREGROUND].getPerfStats()
+        return {
+            fps,
+            layerStats: [bgLayerPerf, fgLayerPerf]
+        }
     }
 
     startLoop() {

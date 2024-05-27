@@ -1,4 +1,5 @@
 import { Direction } from "./Direction"
+import { PerformanceStats } from "./Performance"
 
 export type GameCanvasProps = {
     width: number
@@ -10,5 +11,5 @@ export type GameCanvasHandle = {
     startLoop: () => void
     stopLoop: () => void
     movePlayer: (dir: Direction) => void
-    getFPS: () => number
+    getPerfStats: () => PerformanceStats
 }
