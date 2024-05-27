@@ -1,9 +1,9 @@
+import { Size } from "../types/Size"
 
 type Texture = ''
 
 export interface ObjectShape {
-    width: number // in BLOCKS, not pixels
-    height: number // in BLOCKS
+    size: Size
     texture: Texture | string // Path to .jpg, .png texture of CSS colorstring
     collision: boolean
 }
@@ -21,8 +21,8 @@ export class Object {
 
     getShape() { return this.shape }
 
-    changeShape(newShape: ObjectShape) {
-        this.shape = newShape
+    changeTexture(newTexture: Texture | string) {
+        this.shape.texture = newTexture
     }
 
     changeCollision(newCollisionStatus: boolean) {
