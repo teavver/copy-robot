@@ -7,19 +7,18 @@ import { Object, ObjectShape } from "./Object";
 
 // The state holds information about what should be visible when 'drawing'
 // the Model and which frame of current state should be visible
-enum ModelState {
+export enum ModelState {
     NORMAL,
     DESTROYED,
 }
 
-enum ModelType {
+export enum ModelType {
     PLAYER,
     ENEMY,
     TERRAIN
 }
 
-interface ModelData {
-    name: string // used for texture resolution
+export interface ModelData {
     type: ModelType
     state: ModelState
     gravity: boolean
@@ -28,7 +27,7 @@ interface ModelData {
 
 export class Model extends Object {
 
-    name: string
+    name: string // used for texture resolution
     type: ModelType
     pos: Position
     state: ModelState
@@ -49,16 +48,16 @@ export class Model extends Object {
     move(dir: Direction, amount: number) {
         switch (dir) {
             case Direction.UP:
-                this.pos.y += amount
+                this.pos.y -= amount
                 break;
             case Direction.DOWN:
-                this.pos.y -= amount
+                this.pos.y += amount
                 break;
             case Direction.RIGHT:
                 this.pos.x += amount
                 break;
             case Direction.LEFT:
-                this.pos.x += amount
+                this.pos.x -= amount
                 break;
         }
     }

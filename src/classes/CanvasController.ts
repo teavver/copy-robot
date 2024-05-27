@@ -1,14 +1,15 @@
-import { SECOND_IN_MS, GLOBALS, MAP_HEIGHT, MAP_WIDTH, BLOCK_SIZE_PX } from "../game/globals"
+import { SECOND_IN_MS, GLOBALS } from "../game/globals"
 import { Layer } from "./Layer"
+import { ObjectShape } from "./Object"
+import { Model, ModelType, ModelState } from "./Model"
 import { Direction } from "../types/Direction"
-import { Player } from "./Player"
 
 export class CanvasController {
     // ctx, layers
     private baseCanvas: HTMLCanvasElement | null = null
 
-    // all the drawing ops done on the different layers
-    // baseContext is used to render the final composited image that combines
+    // drawing ops are done on respective layers in the main loop, the baseContext
+    // is used to render the final composited image that combines layers
     private baseContext: CanvasRenderingContext2D | null = null
     private layers: { [key: string]: Layer } = {}
 
@@ -23,13 +24,34 @@ export class CanvasController {
 
     // misc
     private isRunning: boolean = false
-    private player: Player
+
+
+    // name: string // used for texture resolution
+    // type: ModelType
+    // state: ModelState
+    // gravity: boolean
+    // displayCollision: boolean
+
+    // models
+    playerModelShape: ObjectShape = {
+        size: {
+            width: 1,
+            height: 2,
+        },
+        texture: "DimGrey",
+        collision: true
+    }
+    player = new Model({
+        type: ModelType.PLAYER,
+        state: ModelState.NORMAL,
+        gravity: true,
+        displayCollision: true
+    }, this.playerModelShape, "Player", { x: 200, y: 200 })
 
     constructor(canvas: HTMLCanvasElement | null, targetFps: number = 60) {
         this.baseCanvas = canvas
         this.frameDuration = SECOND_IN_MS / targetFps
         this.fpsInterval = SECOND_IN_MS
-        this.player = new Player({ x: 0, y: 300 })
 
         if (this.baseCanvas) {
             this.baseContext = this.baseCanvas.getContext("2d")
@@ -79,10 +101,12 @@ export class CanvasController {
         }
     }
 
+    // main draw loop
     private draw() {
-        const playerPos = this.player.getPosition()
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
+
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(this.player, this.player.pos.x, this.player.pos.y)
 
         this.compositeLayers()
     }
@@ -109,6 +133,11 @@ export class CanvasController {
         }
     }
 
+    movePlayer(dir: Direction) {
+        const PLAYER_MOVE_SPEED = 4
+        this.player.move(dir, PLAYER_MOVE_SPEED)
+    }
+
     getFPS(): number {
         return parseFloat(this.fps.toFixed(2))
     }
@@ -129,10 +158,5 @@ export class CanvasController {
             cancelAnimationFrame(this.frameRequestID)
             this.frameRequestID = null
         }
-    }
-
-    movePlayer(dir: Direction) {
-        if (!this.isRunning) return
-        this.player.move(dir)
     }
 }
