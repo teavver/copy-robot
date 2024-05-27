@@ -74,8 +74,8 @@ function App() {
                         <div className="flex flex-col">
                             <p>BG layer models:</p>
                             {(bgLayerPerf?.activeModels.length! > 0)
-                                ? bgLayerPerf?.activeModels.map(model => (
-                                    <p>"{model}"</p>
+                                ? bgLayerPerf?.activeModels.map((model, i) => (
+                                    <p key={i}>"{model}"</p>
                                 ))
                                 : <p>-</p>
                             }
@@ -83,8 +83,8 @@ function App() {
                         <div className="flex flex-col">
                             <p>FG layer models:</p>
                             {(fgLayerPerf?.activeModels.length! > 0)
-                                ? fgLayerPerf?.activeModels.map(model => (
-                                    <p>"{model}"</p>
+                                ? fgLayerPerf?.activeModels.map((model, i) => (
+                                    <p key={i}>"{model}"</p>
                                 ))
                                 : <p>-</p>
                             }

@@ -43,12 +43,12 @@ export class Model extends Object {
         this.state = data.state
         this.gravity = data.gravity
         this.displayCollision = data.displayCollision
-        this.isMoving = false
+        this.isMoving = true // FIX THIS 
     }
 
     // amount in px
     move(dir: Direction, amount: number) {
-        this.isMoving = true
+        // this.isMoving = true
         switch (dir) {
             case Direction.UP:
                 this.pos.y -= amount
@@ -63,7 +63,7 @@ export class Model extends Object {
                 this.pos.x -= amount
                 break;
         }
-        this.isMoving = false
+        // this.isMoving = false
     }
 
     applyGravity() {
