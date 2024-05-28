@@ -6,6 +6,7 @@ import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
 
 enum CollisionContactType {
+    NONE,  // far away, not even in detection range
     CLOSE, // in detect range, but no collision yet
     DIRECT // objects colliding (red border)
 }
@@ -66,19 +67,29 @@ export class Layer {
 
     // not sure if i'll need a more sophisticated collisionType in the future
     private detectCollisionType(baseModel: Model, targetModel: Model): [CollisionContactType, Direction] {
-        const baseModelPosData: ModelPositionData = { pos: baseModel.pos, size: blockRectToCanvas(baseModel.getShape().size) }
-        const targetModelPosData: ModelPositionData = { pos: targetModel.pos, size: blockRectToCanvas(targetModel.getShape().size) }
 
+        // check intersection first
+        const baseModelPosData: ModelPositionData = baseModel.getCollisionRect(CollisionRectType.ACTUAL)
+        const targetModelPosData: ModelPositionData = targetModel.getCollisionRect(CollisionRectType.ACTUAL)
         const [intersect, dir] = areRectsIntersecting(baseModelPosData, targetModelPosData)
         if (intersect) {
             return [CollisionContactType.DIRECT, dir]
         }
-        return [CollisionContactType.CLOSE, dir]
+
+        // detection field range
+        const baseModelDetectPosData: ModelPositionData = baseModel.getCollisionRect(CollisionRectType.DETECT)
+        const targetModelDetectPosData: ModelPositionData = targetModel.getCollisionRect(CollisionRectType.DETECT)
+        const [detected, detectDir] = areRectsIntersecting(baseModelDetectPosData, targetModelDetectPosData)
+        if (detected) {
+            return [CollisionContactType.CLOSE, detectDir]
+        }
+        return [CollisionContactType.NONE, Direction.NONE]
+
+
     }
 
     // check collision type and handle it appropriately
-    private handleCollision(baseModel: Model, targetModel: Model) {
-        const [colType, colDir]: [CollisionContactType, Direction] = this.detectCollisionType(baseModel, targetModel)
+    private handleCollision(baseModel: Model, targetModel: Model, colType: CollisionContactType, colDir: Direction) {
         console.log(`baseModel: ${baseModel.name} collision type: ${CollisionContactType[colType]}, colDir: ${Direction[colDir]}`)
         // if (colType === CollisionContactType.DIRECT) {
 
@@ -147,20 +158,24 @@ export class Layer {
     simulatePhysics() {
         this.activeModels.forEach(model => {
 
+            const moveIntent = model.getMoveIntent()
             if (model.name === "Player") {
-                console.log(`player move intent: ${model.getMoveIntent()}`)
+                console.log(`player move intent: ${moveIntent}`)
             }
 
-            // TODO: apply collision checks for all MOVING objects
-            // if (model.name === "Player") {
-            //     const nearbyModels = this.detectNearbyModels(model)
-            //     console.log(`nearby models: ${nearbyModels.map(m => `"${m.name}"`)}`)
-            //     nearbyModels.forEach(targetModel => {
-            //         this.handleCollision(model, targetModel)
-            //     })
-            // }
-
             model.applyGravity()
+
+            // if there are models nearby, run a collision check
+            const nearbyModels = this.detectNearbyModels(model)
+            if (nearbyModels.length > 0) {
+                nearbyModels.forEach(nearbyModel => {
+                    const [colType, colDir] = this.detectCollisionType(model, nearbyModel)
+                    if (colType !== CollisionContactType.NONE) {
+                        this.handleCollision(model, nearbyModel, colType, colDir)
+                    }
+                })
+            }
+
             model.applyMoveIntentForce()
             model.resetMoveIntent()
         })
