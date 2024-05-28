@@ -1,4 +1,4 @@
-const PLAYER_MOVE_SPEED = 1
+const PLAYER_MOVE_SPEED = 2
 const SECOND_IN_MS = 1000
 const BLOCK_SIZE_PX = 16
 const MAP_WIDTH = 48

@@ -122,9 +122,11 @@ export class Layer {
         console.log(
             `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
         )
-        // if (colType === CollisionContactType.DIRECT) {
-
-        // }
+        // do not allow any movement in the direction of targetModel if in direct contact
+        if (colType === CollisionContactType.DIRECT) {
+            console.log("direct contact - block")
+            baseModel.removeMoveIntent(colDir)
+        }
         // console.log(`collision type: ${CollisionContactType[colType]}`)
     }
 

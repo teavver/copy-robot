@@ -35,7 +35,7 @@ export class CanvasController {
     // model objects
     platformModelShape: ObjectShape = {
         size: {
-            width: MAP_WIDTH,
+            width: MAP_WIDTH * (2 / 3),
             height: 2,
         },
         texture: "Grey",
@@ -65,7 +65,7 @@ export class CanvasController {
         {
             type: ModelType.PLAYER,
             state: ModelState.NORMAL,
-            gravity: false,
+            gravity: true,
             displayCollision: true,
         },
         this.playerModelShape,
