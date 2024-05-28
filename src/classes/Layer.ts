@@ -5,8 +5,11 @@ import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 
-type CollisionContactType = "none" | "close" | "direct"
-type CollisionRectType = "DETECT" | "CHECK"
+enum CollisionContactType {
+    CLOSE, // in detect range, but no collision yet
+    DIRECT // objects colliding (red border)
+}
+type CollisionRectType = "DETECT" | "ACTUAL"
 
 export interface ModelPositionData {
     pos: Position
@@ -17,7 +20,8 @@ export class Layer {
 
     name: string
     private context: CanvasRenderingContext2D
-    // List of active (visible) models that should be rendered in game loop
+
+    // List of active (visible) models that this layer is responsible for rendering
     private activeModels: Model[]
 
     constructor(context: CanvasRenderingContext2D, name: string) {
@@ -30,25 +34,22 @@ export class Layer {
         return this.activeModels.includes(model)
     }
 
-    // in order for the model to be out of bounds, 
-    // it needs to be entirely outside of canvas view
+    // destroy objects that fall out of the map (basic GC)
     private isModelOutOfBounds(model: Model) {
-        const { width, height } = this.context.canvas
         const modelSize = blockRectToCanvas(model.getShape().size)
-        const outOfBounds = (
-            model.pos.x + modelSize.width < 0 ||
-            model.pos.x > width ||
-            model.pos.y + modelSize.height < 0 ||
-            model.pos.y > height
-        )
-        if (outOfBounds) {
-            model.modifyState(ModelState.DESTROYED)// destroy the object
+        const modelPosData: ModelPositionData = { pos: model.pos, size: modelSize }
+        const { width, height } = this.context.canvas
+        const canvasPosData: ModelPositionData = { pos: { x: 0, y: 0 }, size: { width, height } }
+        const inBounds = areRectsIntersecting(modelPosData, canvasPosData)
+        if (!inBounds) {
+            model.modifyState(ModelState.DESTROYED)
             this.removeModel(model)
             return true
         }
         return false
     }
 
+    // get ModelPositionData for each activeModel in the layer (pre-collision detection util)
     private getActiveModelPositions(): ModelPositionData[] {
         const posArr: ModelPositionData[] = []
         this.activeModels.forEach(model => {
@@ -62,10 +63,12 @@ export class Layer {
     }
 
     // pretty useful for debugging
-    // give DETECT for the big one, CHECK for small
+    // give DETECT for the big one, CHECK for small, NONE for basic conversion Model size -> ModelPositionData
     private getCollisionRect(modelPosData: ModelPositionData, colRectType: CollisionRectType): ModelPositionData {
         const modelSizePx = blockRectToCanvas(modelPosData.size)
-        const colRectSize = colRectType === "DETECT" ? COLLISION_DETECTION_FIELD_SIZE_PX : COLLISION_CHECK_FIELD_SIZE_PX
+        const colRectSize = (colRectType === "DETECT")
+            ? COLLISION_DETECTION_FIELD_SIZE_PX
+            : COLLISION_CHECK_FIELD_SIZE_PX
         const data: ModelPositionData = {
             pos: {
                 x: (modelPosData.pos.x - (colRectSize / 2)),
@@ -79,25 +82,43 @@ export class Layer {
         return data
     }
 
-    // detect all models in range from a certain model (radius)
-    // will return list of ones that contact with the passed `model` (if any)
-    // TODO: classify collision as "NONE", "CLOSE" or "DIRECT"
-    private detectNearbyModels(model: Model): ModelPositionData[] {
-        const nearbyModels: ModelPositionData[] = []
+    // detect & return list of models in detection range from baseModel
+    private detectNearbyModels(model: Model): Model[] {
+
         const baseModelPosData: ModelPositionData = { pos: model.pos, size: model.getShape().size }
         const modelCollisionRect: ModelPositionData = this.getCollisionRect(baseModelPosData, "DETECT")
+        const nearbyModels: Model[] = []
         const activeModelsPositions: ModelPositionData[] = this.getActiveModelPositions()
-        activeModelsPositions.forEach(activeModel => {
-            // skip the base model
+
+        activeModelsPositions.forEach((activeModel, idx) => {
+            // skip checking the base model with itself
             if (activeModel.pos.x === model.pos.x && activeModel.pos.y === model.pos.y) return
 
             // check if DETECT radiuses are intersecting
             const activeModelColRect = this.getCollisionRect(activeModel, "DETECT")
             if (areRectsIntersecting(modelCollisionRect, activeModelColRect)) {
-                nearbyModels.push(activeModel)
+                nearbyModels.push(this.activeModels[idx])
+                // nearbyModels.push(activeModel)
             }
         })
         return nearbyModels
+    }
+
+    // not sure if i'll need a more sophisticated collisionType in the future
+    private detectCollisionType(baseModel: Model, targetModel: Model): CollisionContactType {
+        const baseModelPosData: ModelPositionData = { pos: baseModel.pos, size: blockRectToCanvas(baseModel.getShape().size) }
+        const targetModelPosData: ModelPositionData = { pos: targetModel.pos, size: blockRectToCanvas(targetModel.getShape().size) }
+        console.log(baseModelPosData)
+        if (areRectsIntersecting(baseModelPosData, targetModelPosData)) {
+            return CollisionContactType.DIRECT
+        }
+        return CollisionContactType.CLOSE
+    }
+
+    // check collision type and handle it appropriately
+    private handleCollision(baseModel: Model, targetModel: Model) {
+        const colType: CollisionContactType = this.detectCollisionType(baseModel, targetModel)
+        console.log(`collision type: ${CollisionContactType[colType]}`)
     }
 
     getContext(): CanvasRenderingContext2D {
@@ -139,6 +160,8 @@ export class Layer {
         if (model.state === ModelState.DESTROYED) return
 
         // console.log(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model)}`)
+
+        // FIRST modelpos
         if (!this.isModelActive(model) || this.isModelOutOfBounds(model)) return
         const shape = model.getShape()
         const { width, height } = blockRectToCanvas(shape.size)
@@ -151,10 +174,10 @@ export class Layer {
             const colDR = this.getCollisionRect({ pos: model.pos, size: shape.size }, "DETECT")
             this.context.strokeRect(colDR.pos.x, colDR.pos.y, colDR.size.width, colDR.size.height)
 
-            // draw collision check field (and center it)
-            this.context.strokeStyle = "rgba(255, 255, 0, 1)"
-            const colCR = this.getCollisionRect({ pos: model.pos, size: shape.size }, "CHECK")
-            this.context.strokeRect(colCR.pos.x, colCR.pos.y, colCR.size.width, colCR.size.height)
+            // // draw collision check field (and center it)
+            // this.context.strokeStyle = "rgba(255, 255, 0, 1)"
+            // const colCR = this.getCollisionRect({ pos: model.pos, size: shape.size }, "CHECK")
+            // this.context.strokeRect(colCR.pos.x, colCR.pos.y, colCR.size.width, colCR.size.height)
 
             // test2
             // this.context.strokeRect((posX - (COLLISION_FIELD_SIZE_PX / 2)),
@@ -169,15 +192,18 @@ export class Layer {
     }
 
     // Simulate physics for all models that belong to this layer
-    // The flow of physics in this case is: collision -> gravity -> other 
+    // The flow of physics in this case is: gravity -> collision check -> other 
     simulatePhysics() {
-        // get positions of all objects for this tick
         this.activeModels.forEach(model => {
-            // console.log(`model ${model.name}, ismoving: ${model.isMoving}`)
-            if (model.name === "Player") {
-                console.log(`baseModel: ${model.name}, nearby models: ${this.detectNearbyModels(model)}`)
-            }
             model.applyGravity()
+            // TODO: apply collision checks for all MOVING objects
+            if (model.name === "Player") {
+                const nearbyModels = this.detectNearbyModels(model)
+                console.log(`nearby models: ${nearbyModels.map(m => `"${m.name}"`)}`)
+                nearbyModels.forEach(targetModel => {
+                    this.handleCollision(model, targetModel)
+                })
+            }
         })
     }
 

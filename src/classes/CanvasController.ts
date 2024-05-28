@@ -74,7 +74,7 @@ export class CanvasController {
         type: ModelType.TERRAIN,
         state: ModelState.NORMAL,
         gravity: false,
-        displayCollision: true
+        displayCollision: false
     }, this.pillarModelShape, "Pillar", { x: blocksToCanvas(MAP_WIDTH * 3 / 4), y: blocksToCanvas(0) })
 
     constructor(canvas: HTMLCanvasElement | null, targetFps: number = 60) {
@@ -137,10 +137,13 @@ export class CanvasController {
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
 
+        // bg
         this.layers[GLOBALS.LAYERS.BACKGROUND].drawModel(this.pillar, this.pillar.pos.x, this.pillar.pos.y)
+
+        // fg        
+        this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
         this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(this.platform, this.platform.pos.x, this.platform.pos.y)
         this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(this.player, this.player.pos.x, this.player.pos.y)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
 
         this.compositeLayers()
     }
@@ -169,7 +172,7 @@ export class CanvasController {
 
     movePlayer(dir: Direction) {
         if (!this.isRunning) return
-        const PLAYER_MOVE_SPEED = 2
+        const PLAYER_MOVE_SPEED = 1
         this.player.move(dir, PLAYER_MOVE_SPEED)
     }
 
