@@ -34,12 +34,10 @@ export class Layer {
     }
 
     // destroy objects that fall out of the map (basic GC)
-    private isModelOutOfBounds(model: Model) {
-        const modelSize = blockRectToCanvas(model.getShape().size)
-        const modelPosData: ModelPositionData = { pos: model.pos, size: modelSize }
+    private isModelOutOfBounds(model: Model, mPosData: ModelPositionData): boolean {
         const { width, height } = this.context.canvas
         const canvasPosData: ModelPositionData = { pos: { x: 0, y: 0 }, size: { width, height } }
-        const inBounds = areRectsIntersecting(modelPosData, canvasPosData)
+        const inBounds = areRectsIntersecting(mPosData, canvasPosData)
         if (!inBounds) {
             model.modifyState(ModelState.DESTROYED)
             this.removeModel(model)
@@ -62,6 +60,7 @@ export class Layer {
     }
 
     // detect & return list of models in detection range from baseModel
+    // modelSize in px
     private detectNearbyModels(baseModel: Model): Model[] {
         const nearbyModels: Model[] = []
         const baseModelColRect = baseModel.getCollisionRect(CollisionRectType.DETECT)
@@ -82,7 +81,6 @@ export class Layer {
     private detectCollisionType(baseModel: Model, targetModel: Model): CollisionContactType {
         const baseModelPosData: ModelPositionData = { pos: baseModel.pos, size: blockRectToCanvas(baseModel.getShape().size) }
         const targetModelPosData: ModelPositionData = { pos: targetModel.pos, size: blockRectToCanvas(targetModel.getShape().size) }
-        console.log(baseModelPosData)
         if (areRectsIntersecting(baseModelPosData, targetModelPosData)) {
             return CollisionContactType.DIRECT
         }
@@ -92,20 +90,16 @@ export class Layer {
     // check collision type and handle it appropriately
     private handleCollision(baseModel: Model, targetModel: Model) {
         const colType: CollisionContactType = this.detectCollisionType(baseModel, targetModel)
-        console.log(`collision type: ${CollisionContactType[colType]}`)
+        // console.log(`collision type: ${CollisionContactType[colType]}`)
     }
 
     getContext(): CanvasRenderingContext2D {
         return this.context
     }
 
-    /**
-     * Clear the entire layer
-     */
     clear() {
         const canvas = this.context.canvas
         this.context.clearRect(0, 0, canvas.width, canvas.height)
-        // console.log('[layer] clear ok')
     }
 
     addModel(model: Model) {
@@ -132,20 +126,22 @@ export class Layer {
     drawModel(model: Model, posX: number, posY: number) {
         // do not draw inactive and destroyed models
         if (model.state === ModelState.DESTROYED) return
+
+        const mShape = model.getShape()
+        const mSizePx = blockRectToCanvas(mShape.size)
+        const mPosData: ModelPositionData = { pos: model.pos, size: mSizePx }
         // console.log(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model)}`)
 
-        if (!this.isModelActive(model) || this.isModelOutOfBounds(model)) return
-        const shape = model.getShape()
-        const { width, height } = blockRectToCanvas(shape.size)
-        this.context.fillStyle = shape.texture
-        this.context.fillRect(posX, posY, width, height)
+        if (!this.isModelActive(model) || this.isModelOutOfBounds(model, mPosData)) return
+        this.context.fillStyle = mShape.texture
+
+        this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         if (model.displayCollision) {
-            // draw collisision detection field
+            // draw col detection field rect
             this.context.strokeStyle = "rgba(255, 255, 200, 1)"
             const colDR = model.getCollisionRect(CollisionRectType.DETECT)
             this.context.strokeRect(colDR.pos.x, colDR.pos.y, colDR.size.width, colDR.size.height)
-
-            // draw actual model collision rect
+            // draw actual col rect
             this.context.strokeStyle = "rgba(255, 0, 0, 1)"
             const colR = model.getCollisionRect(CollisionRectType.ACTUAL)
             this.context.strokeRect(colR.pos.x, colR.pos.y, colR.size.width, colR.size.height)

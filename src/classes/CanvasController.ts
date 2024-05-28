@@ -61,7 +61,7 @@ export class CanvasController {
         state: ModelState.NORMAL,
         gravity: false,
         displayCollision: true
-    }, this.playerModelShape, "Player", { x: 0, y: 0 })
+    }, this.playerModelShape, "Player", { x: 60, y: 240 })
 
     platform = new Model({
         type: ModelType.TERRAIN,
@@ -94,7 +94,7 @@ export class CanvasController {
                 this.createLayerContext(),
                 "FG"
             )
-            console.log("[gc controller] init OK")
+            console.log("[CC] init OK")
         }
     }
 
@@ -207,5 +207,14 @@ export class CanvasController {
             cancelAnimationFrame(this.frameRequestID)
             this.frameRequestID = null
         }
+
+        this.lastFrameTime = 0
+        this.fps = 0
+        this.frameCount = 0
+        this.lastFpsUpdateTime = 0
+
+        this.layers[GLOBALS.LAYERS.BACKGROUND].removeModel(this.pillar)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(this.platform)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(this.player)
     }
 }
