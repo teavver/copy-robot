@@ -1,9 +1,9 @@
 import { Model, ModelState, CollisionRectType } from "./Model"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
-import { COLLISION_DETECTION_FIELD_SIZE_PX } from "../game/globals"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
+import { Direction } from "../types/Direction"
 
 enum CollisionContactType {
     CLOSE, // in detect range, but no collision yet
@@ -46,19 +46,6 @@ export class Layer {
         return false
     }
 
-    // get ModelPositionData for each activeModel in the layer (pre-collision detection util)
-    private getActiveModelPositions(): ModelPositionData[] {
-        const posArr: ModelPositionData[] = []
-        this.activeModels.forEach(model => {
-            const posData: ModelPositionData = {
-                pos: model.pos,
-                size: blockRectToCanvas(model.getShape().size)
-            }
-            posArr.push(posData)
-        })
-        return posArr
-    }
-
     // detect & return list of models in detection range from baseModel
     // modelSize in px
     private detectNearbyModels(baseModel: Model): Model[] {
@@ -78,18 +65,24 @@ export class Layer {
     }
 
     // not sure if i'll need a more sophisticated collisionType in the future
-    private detectCollisionType(baseModel: Model, targetModel: Model): CollisionContactType {
+    private detectCollisionType(baseModel: Model, targetModel: Model): [CollisionContactType, Direction] {
         const baseModelPosData: ModelPositionData = { pos: baseModel.pos, size: blockRectToCanvas(baseModel.getShape().size) }
         const targetModelPosData: ModelPositionData = { pos: targetModel.pos, size: blockRectToCanvas(targetModel.getShape().size) }
-        if (areRectsIntersecting(baseModelPosData, targetModelPosData)) {
-            return CollisionContactType.DIRECT
+
+        const [intersect, dir] = areRectsIntersecting(baseModelPosData, targetModelPosData)
+        if (intersect) {
+            return [CollisionContactType.DIRECT, dir]
         }
-        return CollisionContactType.CLOSE
+        return [CollisionContactType.CLOSE, dir]
     }
 
     // check collision type and handle it appropriately
     private handleCollision(baseModel: Model, targetModel: Model) {
-        const colType: CollisionContactType = this.detectCollisionType(baseModel, targetModel)
+        const [colType, colDir]: [CollisionContactType, Direction] = this.detectCollisionType(baseModel, targetModel)
+        console.log(`baseModel: ${baseModel.name} collision type: ${CollisionContactType[colType]}, colDir: ${Direction[colDir]}`)
+        // if (colType === CollisionContactType.DIRECT) {
+
+        // }
         // console.log(`collision type: ${CollisionContactType[colType]}`)
     }
 
@@ -149,18 +142,27 @@ export class Layer {
     }
 
     // Simulate physics for all models that belong to this layer
-    // The flow of physics in this case is: gravity -> collision check -> other 
+    // The order of physics ops in this case is:
+    // Read Movement intent from objects => Apply Gravity => Apply Collision checks => Movement execution
     simulatePhysics() {
         this.activeModels.forEach(model => {
-            model.applyGravity()
-            // TODO: apply collision checks for all MOVING objects
+
             if (model.name === "Player") {
-                const nearbyModels = this.detectNearbyModels(model)
-                console.log(`nearby models: ${nearbyModels.map(m => `"${m.name}"`)}`)
-                nearbyModels.forEach(targetModel => {
-                    this.handleCollision(model, targetModel)
-                })
+                console.log(`player move intent: ${model.getMoveIntent()}`)
             }
+
+            // TODO: apply collision checks for all MOVING objects
+            // if (model.name === "Player") {
+            //     const nearbyModels = this.detectNearbyModels(model)
+            //     console.log(`nearby models: ${nearbyModels.map(m => `"${m.name}"`)}`)
+            //     nearbyModels.forEach(targetModel => {
+            //         this.handleCollision(model, targetModel)
+            //     })
+            // }
+
+            model.applyGravity()
+            model.applyMoveIntentForce()
+            model.resetMoveIntent()
         })
     }
 

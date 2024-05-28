@@ -1,4 +1,4 @@
-import { COLLISION_DETECTION_FIELD_SIZE_PX } from "../game/globals";
+import { COLLISION_DETECTION_FIELD_SIZE_PX, GLOBALS, PLAYER_MOVE_SPEED } from "../game/globals";
 import { blockRectToCanvas } from "../game/utils";
 import { Direction } from "../types/Direction";
 import { Position } from "../types/Position";
@@ -41,7 +41,7 @@ export class Model extends Object {
     state: ModelState
     gravity: boolean
     displayCollision: boolean
-    isMoving: boolean
+    moveIntent: Set<Direction>
 
     constructor(data: ModelData, shape: ObjectShape, name: string, initialPos: Position) {
         super(shape)
@@ -51,7 +51,7 @@ export class Model extends Object {
         this.state = data.state
         this.gravity = data.gravity
         this.displayCollision = data.displayCollision
-        this.isMoving = true // FIX THIS 
+        this.moveIntent = new Set<Direction>
     }
 
     // pretty useful for debugging
@@ -74,35 +74,50 @@ export class Model extends Object {
         return data
     }
 
-    // amount in px
-    move(dir: Direction, amount: number) {
-        // this.isMoving = true
-        switch (dir) {
-            case Direction.UP:
-                this.pos.y -= amount
-                break;
-            case Direction.DOWN:
-                this.pos.y += amount
-                break;
-            case Direction.RIGHT:
-                this.pos.x += amount
-                break;
-            case Direction.LEFT:
-                this.pos.x -= amount
-                break;
-        }
-        // this.isMoving = false
-    }
-
     applyGravity() {
         if (this.gravity) {
-            this.isMoving = true
-            this.pos.y += 4
-            this.isMoving = false
+            this.addMoveIntent(Direction.DOWN)
         }
     }
 
     modifyState(newState: ModelState) {
         this.state = newState
     }
+
+    addMoveIntent(direction: Direction) {
+        this.moveIntent.add(direction)
+    }
+
+    removeMoveIntent(direction: Direction) {
+        this.moveIntent.delete(direction)
+    }
+
+    resetMoveIntent() {
+        this.moveIntent = new Set<Direction>
+    }
+
+    getMoveIntent(): Direction[] {
+        return Array.from(this.moveIntent)
+    }
+
+    // force = px per tick/frame
+    applyMoveIntentForce(force: number = PLAYER_MOVE_SPEED) {
+        this.moveIntent.forEach((dir: Direction) => {
+            switch (dir) {
+                case Direction.UP:
+                    this.pos.y -= force;
+                    break;
+                case Direction.LEFT:
+                    this.pos.x -= force;
+                    break;
+                case Direction.DOWN:
+                    this.pos.y += force;
+                    break;
+                case Direction.RIGHT:
+                    this.pos.x += force;
+                    break;
+            }
+        })
+    }
+
 }

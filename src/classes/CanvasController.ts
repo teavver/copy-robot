@@ -1,4 +1,4 @@
-import { SECOND_IN_MS, GLOBALS, MAP_WIDTH, MAP_HEIGHT } from "../game/globals"
+import { SECOND_IN_MS, GLOBALS, MAP_WIDTH, MAP_HEIGHT, PLAYER_MOVE_SPEED } from "../game/globals"
 import { Layer } from "./Layer"
 import { ObjectShape } from "./Object"
 import { Model, ModelType, ModelState } from "./Model"
@@ -172,8 +172,7 @@ export class CanvasController {
 
     movePlayer(dir: Direction) {
         if (!this.isRunning) return
-        const PLAYER_MOVE_SPEED = 1
-        this.player.move(dir, PLAYER_MOVE_SPEED)
+        this.player.addMoveIntent(dir)
     }
 
     getPerfStats(): PerformanceStats {
