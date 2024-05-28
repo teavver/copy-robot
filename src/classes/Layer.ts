@@ -1,6 +1,6 @@
-import { Model, ModelState } from "./Model"
+import { Model, ModelState, CollisionRectType } from "./Model"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
-import { COLLISION_CHECK_FIELD_SIZE_PX, COLLISION_DETECTION_FIELD_SIZE_PX } from "../game/globals"
+import { COLLISION_DETECTION_FIELD_SIZE_PX } from "../game/globals"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
@@ -9,7 +9,6 @@ enum CollisionContactType {
     CLOSE, // in detect range, but no collision yet
     DIRECT // objects colliding (red border)
 }
-type CollisionRectType = "DETECT" | "ACTUAL"
 
 export interface ModelPositionData {
     pos: Position
@@ -62,43 +61,18 @@ export class Layer {
         return posArr
     }
 
-    // pretty useful for debugging
-    // give DETECT for the big one, CHECK for small, NONE for basic conversion Model size -> ModelPositionData
-    private getCollisionRect(modelPosData: ModelPositionData, colRectType: CollisionRectType): ModelPositionData {
-        const modelSizePx = blockRectToCanvas(modelPosData.size)
-        const colRectSize = (colRectType === "DETECT")
-            ? COLLISION_DETECTION_FIELD_SIZE_PX
-            : COLLISION_CHECK_FIELD_SIZE_PX
-        const data: ModelPositionData = {
-            pos: {
-                x: (modelPosData.pos.x - (colRectSize / 2)),
-                y: (modelPosData.pos.y - (colRectSize / 2)),
-            },
-            size: {
-                width: (modelSizePx.width + (colRectSize)),
-                height: (modelSizePx.height + (colRectSize))
-            }
-        }
-        return data
-    }
-
     // detect & return list of models in detection range from baseModel
-    private detectNearbyModels(model: Model): Model[] {
-
-        const baseModelPosData: ModelPositionData = { pos: model.pos, size: model.getShape().size }
-        const modelCollisionRect: ModelPositionData = this.getCollisionRect(baseModelPosData, "DETECT")
+    private detectNearbyModels(baseModel: Model): Model[] {
         const nearbyModels: Model[] = []
-        const activeModelsPositions: ModelPositionData[] = this.getActiveModelPositions()
-
-        activeModelsPositions.forEach((activeModel, idx) => {
+        const baseModelColRect = baseModel.getCollisionRect(CollisionRectType.DETECT)
+        this.activeModels.forEach((model: Model, idx) => {
             // skip checking the base model with itself
-            if (activeModel.pos.x === model.pos.x && activeModel.pos.y === model.pos.y) return
+            if (baseModel.pos.x === model.pos.x && baseModel.pos.y === model.pos.y) return
 
             // check if DETECT radiuses are intersecting
-            const activeModelColRect = this.getCollisionRect(activeModel, "DETECT")
-            if (areRectsIntersecting(modelCollisionRect, activeModelColRect)) {
+            const activeModelColRect = model.getCollisionRect(CollisionRectType.DETECT)
+            if (areRectsIntersecting(baseModelColRect, activeModelColRect)) {
                 nearbyModels.push(this.activeModels[idx])
-                // nearbyModels.push(activeModel)
             }
         })
         return nearbyModels
@@ -158,36 +132,23 @@ export class Layer {
     drawModel(model: Model, posX: number, posY: number) {
         // do not draw inactive and destroyed models
         if (model.state === ModelState.DESTROYED) return
-
         // console.log(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model)}`)
 
-        // FIRST modelpos
         if (!this.isModelActive(model) || this.isModelOutOfBounds(model)) return
         const shape = model.getShape()
         const { width, height } = blockRectToCanvas(shape.size)
         this.context.fillStyle = shape.texture
         this.context.fillRect(posX, posY, width, height)
         if (model.displayCollision) {
-
             // draw collisision detection field
             this.context.strokeStyle = "rgba(255, 255, 200, 1)"
-            const colDR = this.getCollisionRect({ pos: model.pos, size: shape.size }, "DETECT")
+            const colDR = model.getCollisionRect(CollisionRectType.DETECT)
             this.context.strokeRect(colDR.pos.x, colDR.pos.y, colDR.size.width, colDR.size.height)
-
-            // // draw collision check field (and center it)
-            // this.context.strokeStyle = "rgba(255, 255, 0, 1)"
-            // const colCR = this.getCollisionRect({ pos: model.pos, size: shape.size }, "CHECK")
-            // this.context.strokeRect(colCR.pos.x, colCR.pos.y, colCR.size.width, colCR.size.height)
-
-            // test2
-            // this.context.strokeRect((posX - (COLLISION_FIELD_SIZE_PX / 2)),
-            //     (posY - (COLLISION_FIELD_SIZE_PX / 2)),
-            //     (width + (COLLISION_FIELD_SIZE_PX)),
-            //     (height + (COLLISION_FIELD_SIZE_PX)))
 
             // draw actual model collision rect
             this.context.strokeStyle = "rgba(255, 0, 0, 1)"
-            this.context.strokeRect(posX, posY, width, height)
+            const colR = model.getCollisionRect(CollisionRectType.ACTUAL)
+            this.context.strokeRect(colR.pos.x, colR.pos.y, colR.size.width, colR.size.height)
         }
     }
 

@@ -61,7 +61,7 @@ export class CanvasController {
         state: ModelState.NORMAL,
         gravity: false,
         displayCollision: true
-    }, this.playerModelShape, "Player", { x: 200, y: 200 })
+    }, this.playerModelShape, "Player", { x: 0, y: 0 })
 
     platform = new Model({
         type: ModelType.TERRAIN,

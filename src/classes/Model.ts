@@ -1,5 +1,8 @@
+import { COLLISION_DETECTION_FIELD_SIZE_PX } from "../game/globals";
+import { blockRectToCanvas } from "../game/utils";
 import { Direction } from "../types/Direction";
 import { Position } from "../types/Position";
+import { ModelPositionData } from "./Layer";
 import { Object, ObjectShape } from "./Object";
 
 // Model is an extension of a `Shape`
@@ -25,6 +28,11 @@ export interface ModelData {
     displayCollision: boolean
 }
 
+export enum CollisionRectType {
+    DETECT,
+    ACTUAL
+}
+
 export class Model extends Object {
 
     name: string // used for texture resolution
@@ -44,6 +52,26 @@ export class Model extends Object {
         this.gravity = data.gravity
         this.displayCollision = data.displayCollision
         this.isMoving = true // FIX THIS 
+    }
+
+    // pretty useful for debugging
+    // give DETECT for the big one, ACTUAL for the real collision rect of Model
+    getCollisionRect(type: CollisionRectType): ModelPositionData {
+        const modelSizePx = blockRectToCanvas(this.getShape().size)
+        if (type === CollisionRectType.ACTUAL) {
+            return { pos: this.pos, size: modelSizePx }
+        }
+        const data: ModelPositionData = {
+            pos: {
+                x: (this.pos.x - (COLLISION_DETECTION_FIELD_SIZE_PX / 2)),
+                y: (this.pos.y - (COLLISION_DETECTION_FIELD_SIZE_PX / 2)),
+            },
+            size: {
+                width: (modelSizePx.width + (COLLISION_DETECTION_FIELD_SIZE_PX)),
+                height: (modelSizePx.height + (COLLISION_DETECTION_FIELD_SIZE_PX))
+            }
+        }
+        return data
     }
 
     // amount in px
