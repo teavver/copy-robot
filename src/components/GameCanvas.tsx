@@ -72,4 +72,3 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
 )
 
 export default GameCanvas
-

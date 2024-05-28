@@ -1,4 +1,3 @@
-
 const PLAYER_MOVE_SPEED = 1
 const SECOND_IN_MS = 1000
 const BLOCK_SIZE_PX = 16
@@ -30,5 +29,5 @@ export {
     MAP_WIDTH,
     MAP_HEIGHT,
     COLLISION_DETECTION_FIELD_SIZE_PX,
-    GLOBALS
+    GLOBALS,
 }

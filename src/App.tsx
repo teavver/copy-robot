@@ -24,14 +24,14 @@ function App() {
     useEffect(() => {
         if (gc.current) {
             const intervalId = setInterval(() => {
-                const perfStats: PerformanceStats | undefined = gc.current?.getPerfStats()
+                const perfStats: PerformanceStats | undefined =
+                    gc.current?.getPerfStats()
                 if (perfStats) {
                     // console.log(perfStats)
                     setBgLayerPerf(perfStats.layerStats[0])
                     setFgLayerPerf(perfStats.layerStats[1])
                     setFps(perfStats.fps)
                 }
-
             }, 1000)
 
             return () => {
@@ -66,31 +66,31 @@ function App() {
                         >
                             Stop game loop
                         </button>
-
                     </div>
 
                     <div className="flex gap-3">
                         <p>fps: {fps}</p>
                         <div className="flex flex-col">
                             <p>BG layer models:</p>
-                            {(bgLayerPerf?.activeModels.length! > 0)
-                                ? bgLayerPerf?.activeModels.map((model, i) => (
+                            {bgLayerPerf?.activeModels.length! > 0 ? (
+                                bgLayerPerf?.activeModels.map((model, i) => (
                                     <p key={i}>"{model}"</p>
                                 ))
-                                : <p>-</p>
-                            }
+                            ) : (
+                                <p>-</p>
+                            )}
                         </div>
                         <div className="flex flex-col">
                             <p>FG layer models:</p>
-                            {(fgLayerPerf?.activeModels.length! > 0)
-                                ? fgLayerPerf?.activeModels.map((model, i) => (
+                            {fgLayerPerf?.activeModels.length! > 0 ? (
+                                fgLayerPerf?.activeModels.map((model, i) => (
                                     <p key={i}>"{model}"</p>
                                 ))
-                                : <p>-</p>
-                            }
+                            ) : (
+                                <p>-</p>
+                            )}
                         </div>
                     </div>
-
                 </div>
             )}
         </div>

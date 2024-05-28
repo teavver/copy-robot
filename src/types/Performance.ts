@@ -1,4 +1,3 @@
-
 export interface LayerPerformanceStats {
     layerName: string
     activeModels: string[]
