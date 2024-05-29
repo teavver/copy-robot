@@ -5,6 +5,7 @@ import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
 import { Player } from "./Player"
+import { PLAYER_MOVE_SPEED, PROJECTILE_MOVE_SPEED } from "../game/globals"
 
 enum CollisionContactType {
     NONE, // far away, not even in detection range
@@ -274,7 +275,8 @@ export class Layer {
                 player.updateData()
             }
 
-            model.applyMoveIntentForce()
+            const moveForce = (model.type === ModelType.PROJECTILE) ? PROJECTILE_MOVE_SPEED : PLAYER_MOVE_SPEED // TEMP HERE
+            model.applyMoveIntentForce(moveForce)
             model.resetMoveIntent()
             model.resetCollisionMap()
         })

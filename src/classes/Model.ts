@@ -92,7 +92,7 @@ export class Model extends Object {
 
     applyGravity() {
         if (this.gravity) {
-            this.addMoveIntent(Direction.DOWN)
+            this.addMoveIntent(this.gravityDirection)
         }
     }
 

@@ -68,31 +68,31 @@ function App() {
                         <p>fps: {fps}</p>
                     </div>
 
-                    <div className="flex gap-3">
-                        <div className="flex flex-col h-48 w-fit overflow-y-auto">
-                            {bgLayerPerf?.activeModels.length! > 0 ? (
-                                <>
-                                    <p>BG layer models ({bgLayerPerf?.activeModels.length}):</p>
+                    <div className="flex gap-3 overflow-x-hidden">
+                        {bgLayerPerf?.activeModels.length! > 0 ? (
+                            <div className="flex flex-col gap-2">
+                                <p>BG layer models ({bgLayerPerf?.activeModels.length}):</p>
+                                <div className="flex flex-col h-48 overflow-x-hidden overflow-y-auto">
                                     {bgLayerPerf?.activeModels.map((model, i) => (
                                         <p key={i}>"{model}"</p>
                                     ))}
-                                </>
-                            ) : (
-                                <p>-</p>
-                            )}
-                        </div>
-                        <div className="flex flex-col h-48 w-fit overflow-y-auto">
-                            {fgLayerPerf?.activeModels.length! > 0 ? (
-                                <>
-                                    <p>FG layer models ({fgLayerPerf?.activeModels.length}):</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>-</p>
+                        )}
+                        {fgLayerPerf?.activeModels.length! > 0 ? (
+                            <div className="flex flex-col gap-2">
+                                <p>FG layer models ({fgLayerPerf?.activeModels.length}):</p>
+                                <div className="flex flex-col h-48 overflow-x-hidden overflow-y-auto">
                                     {fgLayerPerf?.activeModels.map((model, i) => (
                                         <p key={i}>"{model}"</p>
                                     ))}
-                                </>
-                            ) : (
-                                <p>-</p>
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>-</p>
+                        )}
                     </div>
                 </div>
             )}

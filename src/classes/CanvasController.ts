@@ -1,4 +1,4 @@
-import { SECOND_IN_MS, GLOBALS, PLAYER_HEIGHT, PLAYER_WIDTH } from "../game/globals"
+import { SECOND_IN_MS, GLOBALS, PLAYER_HEIGHT, PLAYER_WIDTH, TARGET_FPS } from "../game/globals"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
@@ -30,7 +30,7 @@ export class CanvasController {
     private isRunning: boolean = false
 
     // s2nd platform for testing gravity & collisions
-    constructor(canvas: HTMLCanvasElement | null, targetFps: number = 60) {
+    constructor(canvas: HTMLCanvasElement | null, targetFps: number = TARGET_FPS) {
         this.baseCanvas = canvas
         this.frameDuration = SECOND_IN_MS / targetFps
         this.fpsInterval = SECOND_IN_MS
@@ -43,11 +43,11 @@ export class CanvasController {
             // Init layetrs
             this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(
                 this.createLayerContext(),
-                "BG",
+                GLOBALS.LAYERS.BACKGROUND,
             )
             this.layers[GLOBALS.LAYERS.FOREGROUND] = new Layer(
                 this.createLayerContext(),
-                "FG",
+                GLOBALS.LAYERS.FOREGROUND,
             )
             console.log("[CC] init OK")
         }
@@ -96,14 +96,17 @@ export class CanvasController {
             const bulletData = {
                 type: ModelType.PROJECTILE,
                 state: ModelState.NORMAL,
-                gravity: false,
-                gravityDirection: Direction.UP,
+                gravity: true,
+                gravityDirection: player.data.faceDir,
                 displayCollision: true,
             }
             console.log(bulletData)
+            const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
+                ? player.pos.x - blocksToCanvas(PLAYER_WIDTH)
+                : player.pos.x + blocksToCanvas(PLAYER_WIDTH)
             const playerBulletPos = {
-                x: player.pos.x + blocksToCanvas(PLAYER_WIDTH),
-                y: player.pos.y + blocksToCanvas(PLAYER_HEIGHT),
+                x: bulletStartPosX,
+                y: player.pos.y + blocksToCanvas(PLAYER_HEIGHT / 2),
             }
             const bulletModel = new Model(bulletData, {
                 size: { width: 1, height: 1 },
