@@ -16,7 +16,7 @@ const platformModelShape: ObjectShape = {
 const platform2Shape: ObjectShape = {
     size: {
         width: MAP_WIDTH,
-        height: 2,
+        height: 4,
     },
     texture: "Gray",
     collision: true,

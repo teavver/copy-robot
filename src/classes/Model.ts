@@ -116,7 +116,7 @@ export class Model extends Object {
         this.collisionMap = new Set<Direction>
     }
 
-    getMoveIntent(): Direction[] {
+    getMoveIntentMap(): Direction[] {
         return Array.from(this.moveIntent)
     }
 

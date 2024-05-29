@@ -132,13 +132,12 @@ export class Layer {
         // console.log(
         //     `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
         // )
+
         // do not allow any movement in the direction of targetModel if in direct contact
         if (colType === CollisionContactType.DIRECT) {
-            // console.log("direct contact - block")
             baseModel.removeMoveIntent(colDir)
             baseModel.addCollision(colDir)
         }
-        // console.log(`collision type: ${CollisionContactType[colType]}`)
     }
 
     getContext(): CanvasRenderingContext2D {
@@ -162,14 +161,14 @@ export class Layer {
     }
 
     removeModel(model: Model) {
-        if (model.type === ModelType.PLAYER) {
-            this.activePlayers.push(model as Player)
-            return
-        }
-        this.activeModels = this.activeModels.filter((m) => m !== model)
         console.log(
             `[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`,
         )
+        if (model.type === ModelType.PLAYER) {
+            this.activePlayers = this.activePlayers.filter((m) => m !== model)
+            return
+        }
+        this.activeModels = this.activeModels.filter((m) => m !== model)
     }
 
     getPerfStats(): LayerPerformanceStats {
@@ -232,10 +231,7 @@ export class Layer {
         const allModels = this.getAllActiveModels()
         allModels.forEach((model) => {
 
-            // const moveIntent = model.getMoveIntent()
-            // if (model.name === "Player") {
-            //     console.log(`player move intent: ${moveIntent}`)
-            // }
+            // cant escape gravity bro
             model.applyGravity()
 
             // if there are models nearby, run a collision check
@@ -255,6 +251,22 @@ export class Layer {
                         )
                     }
                 })
+            }
+
+            // player landing
+            // if (model.type === ModelType.PLAYER) {
+            //     const player = model as Player;
+            //     const collisionMap = player.getCollisionMap()
+            //     collisionMap.forEach((dir) => {
+            //         if (dir === Direction.DOWN) {
+            //             player.land();
+            //         }
+            //     })
+            // }
+
+            if (model.type === ModelType.PLAYER) {
+                const player = model as Player
+                player.updateData()
             }
 
             model.applyMoveIntentForce()

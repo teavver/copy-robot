@@ -1,5 +1,5 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
-import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
+import { MAP_WIDTH, MAP_HEIGHT, BLOCK_SIZE_PX } from "./globals"
 import { Player } from "../classes/Player"
 import { pillarModelShape, platform2Shape, platformModelShape, playerModelShape } from "./shapes"
 import { blocksToCanvas } from "./utils"
@@ -15,7 +15,7 @@ const platform2 = new Model(
     },
     platform2Shape,
     "Platform2",
-    { x: blocksToCanvas((MAP_WIDTH / 2)), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(4) },
+    { x: blocksToCanvas((MAP_WIDTH / 2)), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(8) },
 ) // 2-block high platform
 
 const playerModel = new Model(
@@ -27,7 +27,7 @@ const playerModel = new Model(
     },
     playerModelShape,
     "Player",
-    { x: 60, y: 240 },
+    { x: 120, y: (blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(4)) },
 )
 
 const player = new Player(playerModel)
