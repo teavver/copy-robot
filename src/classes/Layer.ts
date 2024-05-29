@@ -138,16 +138,7 @@ export class Layer {
         }
     }
 
-    getContext(): CanvasRenderingContext2D {
-        return this.context
-    }
-
-    clear() {
-        const canvas = this.context.canvas
-        this.context.clearRect(0, 0, canvas.width, canvas.height)
-    }
-
-    addModel(model: Model) {
+    private addModel(model: Model) {
         console.log(
             `[${this.name}] layer model added: ${JSON.stringify(model, null, 2)}`,
         )
@@ -158,7 +149,7 @@ export class Layer {
         this.activeModels.push(model)
     }
 
-    removeModel(model: Model) {
+    private removeModel(model: Model) {
         console.log(
             `[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`,
         )
@@ -169,19 +160,12 @@ export class Layer {
         this.activeModels = this.activeModels.filter((m) => m !== model)
     }
 
-    getPerfStats(): LayerPerformanceStats {
-        return {
-            layerName: this.name,
-            activeModels: this.getAllActiveModels().map((m) => m.name),
-        }
-    }
-
     /**
      * @param posXposY in px
      * @description By default draw on model's pos, but can change
-     * @description Will not draw model on canvas if its not active or out of bounds
+     * @description Will not draw model on canvas if: - model not in active list, - model is destroyed
      */
-    drawModel(
+    private drawModel(
         model: Model,
         posX: number = model.pos.x,
         posY: number = model.pos.y,
@@ -224,6 +208,37 @@ export class Layer {
                 colR.size.height,
             )
         }
+    }
+
+    removeActiveModels(models: Model[]) {
+        models.forEach(m => this.removeModel(m))
+    }
+
+    addActiveModels(models: Model[]) {
+        models.forEach(m => this.addModel(m))
+    }
+
+    getPerfStats(): LayerPerformanceStats {
+        return {
+            layerName: this.name,
+            activeModels: this.getAllActiveModels().map((m) => m.name),
+        }
+    }
+
+    drawActiveModels() {
+        const allModels = this.getAllActiveModels()
+        allModels.forEach(model => {
+            this.drawModel(model)
+        })
+    }
+
+    getContext(): CanvasRenderingContext2D {
+        return this.context
+    }
+
+    clear() {
+        const canvas = this.context.canvas
+        this.context.clearRect(0, 0, canvas.width, canvas.height)
     }
 
     // Simulate physics for all models that belong to this layer

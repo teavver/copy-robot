@@ -7,6 +7,7 @@ import {
     bossCageFloorShape
 } from "./shapes"
 import { blocksToCanvas } from "./utils"
+import { Direction } from "../types/Direction"
 
 // data for all models
 
@@ -16,6 +17,7 @@ const playerModel = new Model(
         type: ModelType.PLAYER,
         state: ModelState.NORMAL,
         gravity: true,
+        gravityDirection: Direction.DOWN,
         displayCollision: true,
     },
     playerModelShape,
@@ -30,6 +32,7 @@ const bossCageBase = {
     type: ModelType.TERRAIN,
     state: ModelState.NORMAL,
     gravity: false,
+    gravityDirection: Direction.NONE,
     displayCollision: true,
 }
 const bossCageLeftWall = new Model(

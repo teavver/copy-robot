@@ -4,9 +4,11 @@ import { Model, ModelState } from "./Model"
 
 interface PlayerData {
     health: number
-    isJumping: boolean
     isShooting: boolean
-    jumpFrame: number
+    shootCooldown: number
+    isJumping: boolean
+    jumpFrame: number   // jump height blocker
+    faceDir: Direction
 }
 
 export class Player extends Model {
@@ -18,6 +20,7 @@ export class Player extends Model {
                 type: playerModel.type,
                 state: playerModel.state,
                 gravity: playerModel.gravity,
+                gravityDirection: Direction.DOWN,
                 displayCollision: playerModel.displayCollision,
             },
             playerModel.getShape(),
@@ -30,7 +33,15 @@ export class Player extends Model {
             jumpFrame: 0,
             isJumping: false,
             isShooting: false,
+            shootCooldown: 0,
+            faceDir: Direction.RIGHT
         }
+    }
+
+    shoot() {
+        if (this.data.shootCooldown > 0) return
+        this.data.shootCooldown += 30 // TODO: Find good value
+        this.data.isShooting = true
     }
 
     move(dir: Direction) {
@@ -39,6 +50,9 @@ export class Player extends Model {
             return
         }
         this.addMoveIntent(dir)
+        if (dir === Direction.LEFT || dir === Direction.RIGHT) {
+            this.data.faceDir = dir
+        }
     }
 
     private jump() {
@@ -56,6 +70,11 @@ export class Player extends Model {
     // handle all internal state updates
     // this should be called before applying move force
     updateData() {
+
+        if (this.data.shootCooldown > 0) {
+            this.data.shootCooldown--
+        }
+
         if (this.getCollisionMap().includes(Direction.DOWN)) {
             this.land()
         }

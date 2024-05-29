@@ -1,5 +1,5 @@
 import { ObjectShape } from "../classes/Object"
-import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
+import { MAP_WIDTH, MAP_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "./globals"
 
 // shapes for models.ts
 
@@ -23,8 +23,8 @@ const bossCageWallShape: ObjectShape = {
 
 const playerModelShape: ObjectShape = {
     size: {
-        width: 2,
-        height: 3,
+        width: PLAYER_WIDTH,
+        height: PLAYER_HEIGHT,
     },
     texture: "DimGrey",
     collision: true,

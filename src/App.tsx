@@ -65,26 +65,30 @@ function App() {
                         >
                             Stop game loop
                         </button>
+                        <p>fps: {fps}</p>
                     </div>
 
                     <div className="flex gap-3">
-                        <p>fps: {fps}</p>
-                        <div className="flex flex-col">
-                            <p>BG layer models:</p>
+                        <div className="flex flex-col h-48 w-fit overflow-y-auto">
                             {bgLayerPerf?.activeModels.length! > 0 ? (
-                                bgLayerPerf?.activeModels.map((model, i) => (
-                                    <p key={i}>"{model}"</p>
-                                ))
+                                <>
+                                    <p>BG layer models ({bgLayerPerf?.activeModels.length}):</p>
+                                    {bgLayerPerf?.activeModels.map((model, i) => (
+                                        <p key={i}>"{model}"</p>
+                                    ))}
+                                </>
                             ) : (
                                 <p>-</p>
                             )}
                         </div>
-                        <div className="flex flex-col">
-                            <p>FG layer models:</p>
+                        <div className="flex flex-col h-48 w-fit overflow-y-auto">
                             {fgLayerPerf?.activeModels.length! > 0 ? (
-                                fgLayerPerf?.activeModels.map((model, i) => (
-                                    <p key={i}>"{model}"</p>
-                                ))
+                                <>
+                                    <p>FG layer models ({fgLayerPerf?.activeModels.length}):</p>
+                                    {fgLayerPerf?.activeModels.map((model, i) => (
+                                        <p key={i}>"{model}"</p>
+                                    ))}
+                                </>
                             ) : (
                                 <p>-</p>
                             )}

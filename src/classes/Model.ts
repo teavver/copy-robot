@@ -22,12 +22,14 @@ export enum ModelType {
     PLAYER, // reserved for player
     ENEMY, // this usually means the model is "killable"
     TERRAIN, // collision on, but not killable
+    PROJECTILE // bullets
 }
 
 export interface ModelData {
     type: ModelType
     state: ModelState
     gravity: boolean
+    gravityDirection: Direction
     displayCollision: boolean
 }
 
@@ -42,6 +44,7 @@ export class Model extends Object {
     pos: Position
     state: ModelState
     gravity: boolean
+    gravityDirection: Direction
     displayCollision: boolean
     // placeholder for where model wants to move before applying physics
     private moveIntent: Set<Direction>
@@ -57,10 +60,11 @@ export class Model extends Object {
     ) {
         super(shape)
         this.name = name
-        this.type = data.type
         this.pos = initialPos
+        this.type = data.type
         this.state = data.state
         this.gravity = data.gravity
+        this.gravityDirection = data.gravityDirection
         this.displayCollision = data.displayCollision
         this.moveIntent = new Set<Direction>()
         this.collisionMap = new Set<Direction>()

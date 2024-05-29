@@ -1,8 +1,12 @@
-import { SECOND_IN_MS, GLOBALS } from "../game/globals"
+import { SECOND_IN_MS, GLOBALS, PLAYER_HEIGHT, PLAYER_WIDTH } from "../game/globals"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
+import { blocksToCanvas } from "../game/utils"
+import { ModelType, ModelState, Model } from "./Model"
+
+const initModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player]
 
 export class CanvasController {
     // ctx, layers
@@ -32,9 +36,11 @@ export class CanvasController {
         this.fpsInterval = SECOND_IN_MS
 
         if (this.baseCanvas) {
+            // Init base context
             this.baseContext = this.baseCanvas.getContext("2d")
             if (!this.baseContext)
                 throw new Error("Base context is not initialized")
+            // Init layetrs
             this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(
                 this.createLayerContext(),
                 "BG",
@@ -56,7 +62,11 @@ export class CanvasController {
     }
 
     private clearLayer(layer: string) {
-        this.layers[layer]?.clear()
+        if (!this.layers[layer]) {
+            console.log(`[CC] cannot clear layer: does not exist (${layer})`)
+            return
+        }
+        this.layers[layer].clear()
     }
 
     private compositeLayers() {
@@ -68,32 +78,43 @@ export class CanvasController {
                 this.baseCanvas!.width,
                 this.baseCanvas!.height,
             )
-            this.baseContext.drawImage(
-                this.layers[GLOBALS.LAYERS.BACKGROUND].getContext().canvas,
-                0,
-                0,
-            )
-            this.baseContext.drawImage(
-                this.layers[GLOBALS.LAYERS.FOREGROUND].getContext().canvas,
-                0,
-                0,
-            )
+            Object.entries(this.layers).forEach(([, layer]) => this.baseContext!.drawImage(layer.getContext().canvas, 0, 0))
         }
     }
 
     // main draw loop
     private draw() {
-        this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
-        this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
+
+        Object.keys(this.layers).forEach(layer => this.clearLayer(layer))
 
         // fg
         this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageFloor)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageCeiling)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageLeftWall)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageRightWall)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(player)
 
+        // PLAYER SHOOT DEMO
+        if (player.data.isShooting) {
+            console.log(' shooot tick ')
+            const bulletData = {
+                type: ModelType.PROJECTILE,
+                state: ModelState.NORMAL,
+                gravity: false,
+                gravityDirection: Direction.UP,
+                displayCollision: true,
+            }
+            console.log(bulletData)
+            const playerBulletPos = {
+                x: player.pos.x + blocksToCanvas(PLAYER_WIDTH),
+                y: player.pos.y + blocksToCanvas(PLAYER_HEIGHT),
+            }
+            const bulletModel = new Model(bulletData, {
+                size: { width: 1, height: 1 },
+                texture: "White",
+                collision: true
+            }, "Bullet", playerBulletPos)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
+            player.data.isShooting = false
+        }
+
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawActiveModels()
         this.compositeLayers()
     }
 
@@ -119,10 +140,17 @@ export class CanvasController {
         }
     }
 
-    movePlayer(dir: Direction) {
+
+    //// user
+    playerMove(dir: Direction) {
         player.move(dir)
     }
 
+    playerShoot() {
+        player.shoot()
+    }
+
+    ///// debug
     getPerfStats(): PerformanceStats {
         const fps = parseFloat(this.fps.toFixed(2))
         const bgLayerPerf =
@@ -135,6 +163,7 @@ export class CanvasController {
         }
     }
 
+    ///// game
     startLoop() {
         if (!this.isRunning) {
             this.isRunning = true
@@ -142,13 +171,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
-
-            // add active models to layers on init
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageRightWall)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageLeftWall)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageCeiling)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageFloor)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(player)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels(initModels)
         }
     }
 
@@ -163,11 +186,6 @@ export class CanvasController {
         this.fps = 0
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
-
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageRightWall)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageLeftWall)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageCeiling)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageFloor)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(player)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeActiveModels(initModels)
     }
 }

@@ -35,16 +35,19 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 if (!canvasRef.current) return
 
                 if (keysPressed.current.has("w")) {
-                    controllerRef.current?.movePlayer(Direction.UP)
+                    controllerRef.current?.playerMove(Direction.UP)
                 }
                 if (keysPressed.current.has("a")) {
-                    controllerRef.current?.movePlayer(Direction.LEFT)
+                    controllerRef.current?.playerMove(Direction.LEFT)
                 }
                 if (keysPressed.current.has("s")) {
-                    controllerRef.current?.movePlayer(Direction.DOWN)
+                    controllerRef.current?.playerMove(Direction.DOWN)
                 }
                 if (keysPressed.current.has("d")) {
-                    controllerRef.current?.movePlayer(Direction.RIGHT)
+                    controllerRef.current?.playerMove(Direction.RIGHT)
+                }
+                if (keysPressed.current.has(" ")) {
+                    controllerRef.current?.playerShoot()
                 }
 
                 requestAnimationFrame(updateMovement)

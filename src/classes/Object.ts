@@ -3,7 +3,7 @@ import { Size } from "../types/Size"
 type Texture = ""
 
 export interface ObjectShape {
-    size: Size
+    size: Size                 // in BLOCKS, not px!
     texture: Texture | string // Path to .jpg, .png texture of CSS colorstring
     collision: boolean
 }
