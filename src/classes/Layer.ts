@@ -1,9 +1,10 @@
-import { Model, ModelState, CollisionRectType } from "./Model"
+import { Model, ModelState, CollisionRectType, ModelType } from "./Model"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
+import { Player } from "./Player"
 
 enum CollisionContactType {
     NONE, // far away, not even in detection range
@@ -22,15 +23,24 @@ export class Layer {
 
     // List of active (visible) models that this layer is responsible for rendering
     private activeModels: Model[]
+    private activePlayers: Player[]
 
     constructor(context: CanvasRenderingContext2D, name: string) {
         this.name = name
         this.context = context
         this.activeModels = []
+        this.activePlayers = []
     }
 
     private isModelActive(model: Model) {
+        if (model.type === ModelType.PLAYER) {
+            return this.activePlayers.includes(model as Player)
+        }
         return this.activeModels.includes(model)
+    }
+
+    private getAllActiveModels(): Model[] {
+        return [...this.activeModels, ...this.activePlayers]
     }
 
     // destroy objects that fall out of the map (basic GC)
@@ -119,13 +129,14 @@ export class Layer {
         colType: CollisionContactType,
         colDir: Direction,
     ) {
-        console.log(
-            `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
-        )
+        // console.log(
+        //     `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
+        // )
         // do not allow any movement in the direction of targetModel if in direct contact
         if (colType === CollisionContactType.DIRECT) {
-            console.log("direct contact - block")
+            // console.log("direct contact - block")
             baseModel.removeMoveIntent(colDir)
+            baseModel.addCollision(colDir)
         }
         // console.log(`collision type: ${CollisionContactType[colType]}`)
     }
@@ -140,13 +151,21 @@ export class Layer {
     }
 
     addModel(model: Model) {
-        this.activeModels.push(model)
         console.log(
             `[${this.name}] layer model added: ${JSON.stringify(model, null, 2)}`,
         )
+        if (model.type === ModelType.PLAYER) {
+            this.activePlayers.push(model as Player)
+            return
+        }
+        this.activeModels.push(model)
     }
 
     removeModel(model: Model) {
+        if (model.type === ModelType.PLAYER) {
+            this.activePlayers.push(model as Player)
+            return
+        }
         this.activeModels = this.activeModels.filter((m) => m !== model)
         console.log(
             `[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`,
@@ -156,7 +175,7 @@ export class Layer {
     getPerfStats(): LayerPerformanceStats {
         return {
             layerName: this.name,
-            activeModels: this.activeModels.map((model) => model.name),
+            activeModels: this.getAllActiveModels().map(m => m.name)
         }
     }
 
@@ -210,11 +229,13 @@ export class Layer {
     // The order of physics ops in this case is:
     // Read Movement intent from objects => Apply Gravity => Apply Collision checks => Movement execution
     simulatePhysics() {
-        this.activeModels.forEach((model) => {
-            const moveIntent = model.getMoveIntent()
-            if (model.name === "Player") {
-                console.log(`player move intent: ${moveIntent}`)
-            }
+        const allModels = this.getAllActiveModels()
+        allModels.forEach((model) => {
+
+            // const moveIntent = model.getMoveIntent()
+            // if (model.name === "Player") {
+            //     console.log(`player move intent: ${moveIntent}`)
+            // }
             model.applyGravity()
 
             // if there are models nearby, run a collision check
@@ -238,6 +259,7 @@ export class Layer {
 
             model.applyMoveIntentForce()
             model.resetMoveIntent()
+            model.resetCollisionMap()
         })
     }
 }

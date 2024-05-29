@@ -1,15 +1,10 @@
 import {
     SECOND_IN_MS,
     GLOBALS,
-    MAP_WIDTH,
-    MAP_HEIGHT,
 } from "../game/globals"
 import { Layer } from "./Layer"
-import { ObjectShape } from "./Object"
-import { Model, ModelType, ModelState } from "./Model"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
-import { blocksToCanvas } from "../game/utils"
 import { player, pillar, platform, platform2 } from "../game/models"
 
 export class CanvasController {
@@ -129,8 +124,7 @@ export class CanvasController {
     }
 
     movePlayer(dir: Direction) {
-        if (!this.isRunning) return
-        player.addMoveIntent(dir)
+        player.move(dir)
     }
 
     getPerfStats(): PerformanceStats {

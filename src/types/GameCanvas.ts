@@ -11,5 +11,8 @@ export type GameCanvasHandle = {
     startLoop: () => void
     stopLoop: () => void
     movePlayer: (dir: Direction) => void
+
+    // debug
     getPerfStats: () => PerformanceStats
+    getCollisionDebugInfo: (name: string) => Direction[] | undefined
 }

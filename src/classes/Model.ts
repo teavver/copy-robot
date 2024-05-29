@@ -43,7 +43,11 @@ export class Model extends Object {
     state: ModelState
     gravity: boolean
     displayCollision: boolean
-    moveIntent: Set<Direction>
+    // placeholder for where model wants to move before applying physics
+    private moveIntent: Set<Direction>
+    // map for active collision contacts.
+    // so if the model is 'on the ground', the map will include Direction.DOWN
+    private collisionMap: Set<Direction>
 
     constructor(
         data: ModelData,
@@ -59,6 +63,7 @@ export class Model extends Object {
         this.gravity = data.gravity
         this.displayCollision = data.displayCollision
         this.moveIntent = new Set<Direction>()
+        this.collisionMap = new Set<Direction>()
     }
 
     // pretty useful for debugging
@@ -95,6 +100,10 @@ export class Model extends Object {
         this.moveIntent.add(direction)
     }
 
+    addCollision(direction: Direction) {
+        this.collisionMap.add(direction)
+    }
+
     removeMoveIntent(direction: Direction) {
         this.moveIntent.delete(direction)
     }
@@ -103,8 +112,16 @@ export class Model extends Object {
         this.moveIntent = new Set<Direction>()
     }
 
+    resetCollisionMap() {
+        this.collisionMap = new Set<Direction>
+    }
+
     getMoveIntent(): Direction[] {
         return Array.from(this.moveIntent)
+    }
+
+    getCollisionMap(): Direction[] {
+        return Array.from(this.collisionMap)
     }
 
     // force = px per tick/frame

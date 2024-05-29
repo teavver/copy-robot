@@ -1,5 +1,6 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
 import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
+import { Player } from "../classes/Player"
 import { pillarModelShape, platform2Shape, platformModelShape, playerModelShape } from "./shapes"
 import { blocksToCanvas } from "./utils"
 
@@ -17,18 +18,19 @@ const platform2 = new Model(
     { x: blocksToCanvas((MAP_WIDTH / 2)), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(4) },
 ) // 2-block high platform
 
-// models TODO: create a separate class for Player and move the models somewhere
-const player = new Model(
+const playerModel = new Model(
     {
         type: ModelType.PLAYER,
         state: ModelState.NORMAL,
         gravity: true,
-        displayCollision: false,
+        displayCollision: true,
     },
     playerModelShape,
     "Player",
     { x: 60, y: 240 },
 )
+
+const player = new Player(playerModel)
 
 const platform = new Model(
     {
@@ -55,6 +57,7 @@ const pillar = new Model(
 )
 
 export {
+    playerModel,
     player,
     platform,
     platform2,
