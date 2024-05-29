@@ -1,4 +1,4 @@
-import { GLOBALS } from "./game/globals"
+import { GLOBALS, TARGET_FPS } from "./game/globals"
 import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"
 import { Status } from "./types/Status"
@@ -6,7 +6,6 @@ import GameCanvas from "./components/GameCanvas"
 import { LayerPerformanceStats, PerformanceStats } from "./types/Performance"
 
 function App() {
-    const TARGET_FRAMERATE = 60 // 60 =max
     const gc = useRef<GameCanvasHandle>(null)
     const [ready, setReady] = useState<Status>("loading")
 
@@ -46,7 +45,7 @@ function App() {
                 ref={gc}
                 width={GLOBALS.CANVAS.WIDTH}
                 height={GLOBALS.CANVAS.HEIGHT}
-                framerate={TARGET_FRAMERATE}
+                framerate={TARGET_FPS}
             />
 
             {ready !== "ready" ? (

@@ -1,4 +1,4 @@
-import { BLOCK_SIZE_PX, GLOBALS, PLAYER_MOVE_SPEED } from "../game/globals";
+import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals";
 import { Direction } from "../types/Direction";
 import { Model, ModelState } from "./Model";
 
@@ -67,7 +67,7 @@ export class Player extends Model {
         // handle jump
         if (this.data.jumpFrame !== 0) {
             // max jump height
-            const maxHeight = this.getShape().size.height * BLOCK_SIZE_PX
+            const maxHeight = (this.getShape().size.height * BLOCK_SIZE_PX) / PLAYER_MOVE_SPEED
             console.log('maxheight ', maxHeight)
             if (this.data.jumpFrame >= maxHeight) {
                 this.data.jumpFrame = 0

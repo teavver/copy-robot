@@ -1,4 +1,5 @@
-const PLAYER_MOVE_SPEED = 2
+const TARGET_FPS = 60
+const PLAYER_MOVE_SPEED = 3
 const SECOND_IN_MS = 1000
 const BLOCK_SIZE_PX = 16
 const MAP_WIDTH = 48
@@ -23,6 +24,7 @@ const GLOBALS = {
 }
 
 export {
+    TARGET_FPS,
     PLAYER_MOVE_SPEED,
     SECOND_IN_MS,
     BLOCK_SIZE_PX,
