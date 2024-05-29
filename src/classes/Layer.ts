@@ -43,7 +43,7 @@ export class Layer {
             pos: { x: 0, y: 0 },
             size: { width, height },
         }
-        const inBounds = areRectsIntersecting(mPosData, canvasPosData)
+        const [inBounds,] = areRectsIntersecting(mPosData, canvasPosData)
         if (!inBounds) {
             model.modifyState(ModelState.DESTROYED)
             this.removeModel(model)
@@ -162,9 +162,10 @@ export class Layer {
 
     /**
      * @param posXposY in px
+     * @description By default draw on model's pos, but can change
      * @description Will not draw model on canvas if its not active or out of bounds
      */
-    drawModel(model: Model, posX: number, posY: number) {
+    drawModel(model: Model, posX: number = model.pos.x, posY: number = model.pos.y) {
         // do not draw inactive and destroyed models
         if (model.state === ModelState.DESTROYED) return
 
@@ -176,8 +177,10 @@ export class Layer {
         if (
             !this.isModelActive(model) ||
             this.isModelOutOfBounds(model, mPosData)
-        )
+        ) {
             return
+        }
+
         this.context.fillStyle = mShape.texture
 
         this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)

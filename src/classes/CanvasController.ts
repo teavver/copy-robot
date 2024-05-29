@@ -10,6 +10,7 @@ import { Model, ModelType, ModelState } from "./Model"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { blocksToCanvas } from "../game/utils"
+import { player, pillar, platform, platform2 } from "../game/models"
 
 export class CanvasController {
     // ctx, layers
@@ -32,71 +33,7 @@ export class CanvasController {
     // misc
     private isRunning: boolean = false
 
-    // model objects
-    platformModelShape: ObjectShape = {
-        size: {
-            width: MAP_WIDTH * (2 / 3),
-            height: 2,
-        },
-        texture: "Grey",
-        collision: true,
-    }
-
-    pillarModelShape: ObjectShape = {
-        size: {
-            width: 2,
-            height: MAP_HEIGHT,
-        },
-        texture: "LightSlateGrey",
-        collision: false,
-    }
-
-    playerModelShape: ObjectShape = {
-        size: {
-            width: 1,
-            height: 2,
-        },
-        texture: "DimGrey",
-        collision: true,
-    }
-
-    // models TODO: create a separate class for Player and move the models somewhere
-    player = new Model(
-        {
-            type: ModelType.PLAYER,
-            state: ModelState.NORMAL,
-            gravity: true,
-            displayCollision: true,
-        },
-        this.playerModelShape,
-        "Player",
-        { x: 60, y: 240 },
-    )
-
-    platform = new Model(
-        {
-            type: ModelType.TERRAIN,
-            state: ModelState.NORMAL,
-            gravity: false,
-            displayCollision: true,
-        },
-        this.platformModelShape,
-        "Platform",
-        { x: 0, y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(2) },
-    ) // 2-block high platform
-
-    pillar = new Model(
-        {
-            type: ModelType.TERRAIN,
-            state: ModelState.NORMAL,
-            gravity: false,
-            displayCollision: false,
-        },
-        this.pillarModelShape,
-        "Pillar",
-        { x: blocksToCanvas((MAP_WIDTH * 3) / 4), y: blocksToCanvas(0) },
-    )
-
+    // s2nd platform for testing gravity & collisions
     constructor(canvas: HTMLCanvasElement | null, targetFps: number = 60) {
         this.baseCanvas = canvas
         this.frameDuration = SECOND_IN_MS / targetFps
@@ -158,24 +95,13 @@ export class CanvasController {
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
 
         // bg
-        this.layers[GLOBALS.LAYERS.BACKGROUND].drawModel(
-            this.pillar,
-            this.pillar.pos.x,
-            this.pillar.pos.y,
-        )
+        this.layers[GLOBALS.LAYERS.BACKGROUND].drawModel(pillar)
 
         // fg
         this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(
-            this.platform,
-            this.platform.pos.x,
-            this.platform.pos.y,
-        )
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(
-            this.player,
-            this.player.pos.x,
-            this.player.pos.y,
-        )
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(platform)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(platform2)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(player)
 
         this.compositeLayers()
     }
@@ -204,7 +130,7 @@ export class CanvasController {
 
     movePlayer(dir: Direction) {
         if (!this.isRunning) return
-        this.player.addMoveIntent(dir)
+        player.addMoveIntent(dir)
     }
 
     getPerfStats(): PerformanceStats {
@@ -228,9 +154,10 @@ export class CanvasController {
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
 
             // add active models to layers on init
-            this.layers[GLOBALS.LAYERS.BACKGROUND].addModel(this.pillar)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(this.platform)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(this.player)
+            this.layers[GLOBALS.LAYERS.BACKGROUND].addModel(pillar)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(platform)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(platform2)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(player)
         }
     }
 
@@ -246,8 +173,9 @@ export class CanvasController {
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
 
-        this.layers[GLOBALS.LAYERS.BACKGROUND].removeModel(this.pillar)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(this.platform)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(this.player)
+        this.layers[GLOBALS.LAYERS.BACKGROUND].removeModel(pillar)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(platform)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(platform2)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(player)
     }
 }
