@@ -1,6 +1,6 @@
-import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals";
-import { Direction } from "../types/Direction";
-import { Model, ModelState } from "./Model";
+import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals"
+import { Direction } from "../types/Direction"
+import { Model, ModelState } from "./Model"
 
 interface PlayerData {
     health: number
@@ -10,21 +10,19 @@ interface PlayerData {
 }
 
 export class Player extends Model {
-
     data: PlayerData
 
     constructor(playerModel: Model) {
-
         super(
             {
                 type: playerModel.type,
                 state: playerModel.state,
                 gravity: playerModel.gravity,
-                displayCollision: playerModel.displayCollision
+                displayCollision: playerModel.displayCollision,
             },
             playerModel.getShape(),
             playerModel.name,
-            playerModel.pos
+            playerModel.pos,
         )
 
         this.data = {
@@ -33,7 +31,6 @@ export class Player extends Model {
             isJumping: false,
             isShooting: false,
         }
-
     }
 
     move(dir: Direction) {
@@ -59,7 +56,6 @@ export class Player extends Model {
     // handle all internal state updates
     // this should be called before applying move force
     updateData() {
-
         if (this.getCollisionMap().includes(Direction.DOWN)) {
             this.land()
         }
@@ -67,8 +63,9 @@ export class Player extends Model {
         // handle jump
         if (this.data.jumpFrame !== 0) {
             // max jump height
-            const maxHeight = (this.getShape().size.height * BLOCK_SIZE_PX) / PLAYER_MOVE_SPEED
-            console.log('maxheight ', maxHeight)
+            const maxHeight =
+                (this.getShape().size.height * BLOCK_SIZE_PX) /
+                PLAYER_MOVE_SPEED
             if (this.data.jumpFrame >= maxHeight) {
                 this.data.jumpFrame = 0
                 return
@@ -76,14 +73,11 @@ export class Player extends Model {
             this.removeMoveIntent(Direction.DOWN) // suck it, gravity
             this.addMoveIntent(Direction.UP)
             this.data.jumpFrame++
-            console.log(this.data.jumpFrame)
         }
 
         // die
         if (this.data.health < 1) {
             this.modifyState(ModelState.DESTROYED)
         }
-
     }
-
 }

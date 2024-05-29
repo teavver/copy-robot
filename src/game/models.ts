@@ -1,23 +1,16 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
-import { MAP_WIDTH, MAP_HEIGHT, BLOCK_SIZE_PX } from "./globals"
+import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
 import { Player } from "../classes/Player"
-import { pillarModelShape, platform2Shape, platformModelShape, playerModelShape } from "./shapes"
+import {
+    playerModelShape,
+    bossCageWallShape,
+    bossCageFloorShape
+} from "./shapes"
 import { blocksToCanvas } from "./utils"
 
 // data for all models
 
-const platform2 = new Model(
-    {
-        type: ModelType.TERRAIN,
-        state: ModelState.NORMAL,
-        gravity: false,
-        displayCollision: true,
-    },
-    platform2Shape,
-    "Platform2",
-    { x: blocksToCanvas((MAP_WIDTH / 2)), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(8) },
-) // 2-block high platform
-
+// \====== PLAYER
 const playerModel = new Model(
     {
         type: ModelType.PLAYER,
@@ -27,39 +20,41 @@ const playerModel = new Model(
     },
     playerModelShape,
     "Player",
-    { x: 120, y: (blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(4)) },
+    { x: blocksToCanvas(4), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
 )
-
 const player = new Player(playerModel)
 
-const platform = new Model(
-    {
-        type: ModelType.TERRAIN,
-        state: ModelState.NORMAL,
-        gravity: false,
-        displayCollision: false,
-    },
-    platformModelShape,
-    "Platform",
-    { x: 0, y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(2) },
-) // 2-block high platform
-
-const pillar = new Model(
-    {
-        type: ModelType.TERRAIN,
-        state: ModelState.NORMAL,
-        gravity: false,
-        displayCollision: false,
-    },
-    pillarModelShape,
-    "Pillar",
-    { x: blocksToCanvas((MAP_WIDTH * 3) / 4), y: blocksToCanvas(0) },
+// ======== BOSS CAGE
+const bossCageWidth = 2 //blocks
+const bossCageBase = {
+    type: ModelType.TERRAIN,
+    state: ModelState.NORMAL,
+    gravity: false,
+    displayCollision: true,
+}
+const bossCageLeftWall = new Model(
+    bossCageBase,
+    bossCageWallShape,
+    "BossCageLeftWall",
+    { x: 0, y: 0 },
+)
+const bossCageRightWall = new Model(
+    bossCageBase,
+    bossCageWallShape,
+    "BossCageRightWall",
+    { x: blocksToCanvas(MAP_WIDTH - bossCageWidth), y: 0 },
+)
+const bossCageFloor = new Model(
+    bossCageBase,
+    bossCageFloorShape,
+    "BossCageRightWall",
+    { x: 0, y: blocksToCanvas(MAP_HEIGHT - bossCageWidth) },
+)
+const bossCageCeiling = new Model(
+    bossCageBase,
+    bossCageFloorShape,
+    "BossCageRightWall",
+    { x: 0, y: 0 },
 )
 
-export {
-    playerModel,
-    player,
-    platform,
-    platform2,
-    pillar
-}
+export { playerModel, player, bossCageLeftWall, bossCageRightWall, bossCageFloor, bossCageCeiling }

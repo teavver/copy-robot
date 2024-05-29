@@ -1,11 +1,8 @@
-import {
-    SECOND_IN_MS,
-    GLOBALS,
-} from "../game/globals"
+import { SECOND_IN_MS, GLOBALS } from "../game/globals"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
-import { player, pillar, platform, platform2 } from "../game/models"
+import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 
 export class CanvasController {
     // ctx, layers
@@ -89,13 +86,12 @@ export class CanvasController {
         this.clearLayer(GLOBALS.LAYERS.BACKGROUND)
         this.clearLayer(GLOBALS.LAYERS.FOREGROUND)
 
-        // bg
-        this.layers[GLOBALS.LAYERS.BACKGROUND].drawModel(pillar)
-
         // fg
         this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(platform)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(platform2)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageFloor)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageCeiling)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageLeftWall)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(bossCageRightWall)
         this.layers[GLOBALS.LAYERS.FOREGROUND].drawModel(player)
 
         this.compositeLayers()
@@ -148,9 +144,10 @@ export class CanvasController {
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
 
             // add active models to layers on init
-            this.layers[GLOBALS.LAYERS.BACKGROUND].addModel(pillar)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(platform)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(platform2)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageRightWall)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageLeftWall)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageCeiling)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(bossCageFloor)
             this.layers[GLOBALS.LAYERS.FOREGROUND].addModel(player)
         }
     }
@@ -167,9 +164,10 @@ export class CanvasController {
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
 
-        this.layers[GLOBALS.LAYERS.BACKGROUND].removeModel(pillar)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(platform)
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(platform2)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageRightWall)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageLeftWall)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageCeiling)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(bossCageFloor)
         this.layers[GLOBALS.LAYERS.FOREGROUND].removeModel(player)
     }
 }

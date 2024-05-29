@@ -53,7 +53,7 @@ export class Layer {
             pos: { x: 0, y: 0 },
             size: { width, height },
         }
-        const [inBounds,] = areRectsIntersecting(mPosData, canvasPosData)
+        const [inBounds] = areRectsIntersecting(mPosData, canvasPosData)
         if (!inBounds) {
             model.modifyState(ModelState.DESTROYED)
             this.removeModel(model)
@@ -132,8 +132,6 @@ export class Layer {
         // console.log(
         //     `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
         // )
-
-        // do not allow any movement in the direction of targetModel if in direct contact
         if (colType === CollisionContactType.DIRECT) {
             baseModel.removeMoveIntent(colDir)
             baseModel.addCollision(colDir)
@@ -174,7 +172,7 @@ export class Layer {
     getPerfStats(): LayerPerformanceStats {
         return {
             layerName: this.name,
-            activeModels: this.getAllActiveModels().map(m => m.name)
+            activeModels: this.getAllActiveModels().map((m) => m.name),
         }
     }
 
@@ -183,7 +181,11 @@ export class Layer {
      * @description By default draw on model's pos, but can change
      * @description Will not draw model on canvas if its not active or out of bounds
      */
-    drawModel(model: Model, posX: number = model.pos.x, posY: number = model.pos.y) {
+    drawModel(
+        model: Model,
+        posX: number = model.pos.x,
+        posY: number = model.pos.y,
+    ) {
         // do not draw inactive and destroyed models
         if (model.state === ModelState.DESTROYED) return
 
@@ -230,7 +232,6 @@ export class Layer {
     simulatePhysics() {
         const allModels = this.getAllActiveModels()
         allModels.forEach((model) => {
-
             // cant escape gravity bro
             model.applyGravity()
 
@@ -252,17 +253,6 @@ export class Layer {
                     }
                 })
             }
-
-            // player landing
-            // if (model.type === ModelType.PLAYER) {
-            //     const player = model as Player;
-            //     const collisionMap = player.getCollisionMap()
-            //     collisionMap.forEach((dir) => {
-            //         if (dir === Direction.DOWN) {
-            //             player.land();
-            //         }
-            //     })
-            // }
 
             if (model.type === ModelType.PLAYER) {
                 const player = model as Player

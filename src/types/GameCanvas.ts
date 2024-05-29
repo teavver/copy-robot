@@ -14,5 +14,4 @@ export type GameCanvasHandle = {
 
     // debug
     getPerfStats: () => PerformanceStats
-    getCollisionDebugInfo: (name: string) => Direction[] | undefined
 }

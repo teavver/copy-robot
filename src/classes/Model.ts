@@ -113,7 +113,7 @@ export class Model extends Object {
     }
 
     resetCollisionMap() {
-        this.collisionMap = new Set<Direction>
+        this.collisionMap = new Set<Direction>()
     }
 
     getMoveIntentMap(): Direction[] {
