@@ -222,7 +222,10 @@ export class Layer {
     getPerfStats(): LayerPerformanceStats {
         return {
             layerName: this.name,
-            activeModels: this.getAllActiveModels().map((m) => m.name),
+            activeModels: this.getAllActiveModels().map((m) => ({
+                type: m.type,
+                name: m.name,
+            })),
         }
     }
 

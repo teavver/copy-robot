@@ -3,14 +3,16 @@ import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"
 import { Status } from "./types/Status"
 import GameCanvas from "./components/GameCanvas"
-import { LayerPerformanceStats, PerformanceStats } from "./types/Performance"
+import { LayerPerformanceStats } from "./types/Performance"
 
 function App() {
     const gc = useRef<GameCanvasHandle>(null)
     const [ready, setReady] = useState<Status>("loading")
 
-    const [bgLayerPerf, setBgLayerPerf] = useState<LayerPerformanceStats>()
-    const [fgLayerPerf, setFgLayerPerf] = useState<LayerPerformanceStats>()
+
+    // Performance debugging/logging
+    const [debugMode, setDebugMode] = useState<boolean>(false)
+    const [layerPerfStats, setLayerPerfStats] = useState<LayerPerformanceStats[]>([])
     const [fps, setFps] = useState<number>(0)
 
     useEffect(() => {
@@ -21,21 +23,16 @@ function App() {
     }, [ready, gc])
 
     useEffect(() => {
-        if (gc.current) {
-            const intervalId = setInterval(() => {
-                const perfStats: PerformanceStats | undefined =
-                    gc.current?.getPerfStats()
-                if (perfStats) {
-                    // console.log(perfStats)
-                    setBgLayerPerf(perfStats.layerStats[0])
-                    setFgLayerPerf(perfStats.layerStats[1])
-                    setFps(perfStats.fps)
-                }
-            }, 1000)
+        if (!gc || !gc.current) return
+        const intervalId = setInterval(() => {
+            const perfStats = gc.current!.getPerfStats()
+            console.log('perf stats: ', perfStats)
+            setFps(perfStats.fps)
+            setLayerPerfStats(perfStats.layerStats)
+        }, 1000)
 
-            return () => {
-                clearInterval(intervalId)
-            }
+        return () => {
+            clearInterval(intervalId)
         }
     }, [gc])
 
@@ -54,46 +51,43 @@ function App() {
                 <div className="flex flex-col gap-3">
                     <div className="flex gap-3">
                         <button
+                            tabIndex={-1}
                             className="select-none focus:outline-none"
                             onClick={() => gc.current?.startLoop()}
                         >
                             Start game loop
                         </button>
                         <button
+                            tabIndex={-1}
                             className="select-none focus:outline-none"
                             onClick={() => gc.current?.stopLoop()}
                         >
                             Stop game loop
                         </button>
+                        <button
+                            tabIndex={-1}
+                            className="select-none focus:outline-none"
+                            onClick={() => setDebugMode(debugMode => !debugMode)}
+                        >
+                            Toggle debug mode ({debugMode.toString()})
+                        </button>
                         <p>fps: {fps}</p>
                     </div>
 
-                    <div className="flex gap-3 overflow-x-hidden">
-                        {bgLayerPerf?.activeModels.length! > 0 ? (
-                            <div className="flex flex-col gap-2">
-                                <p>BG layer models ({bgLayerPerf?.activeModels.length}):</p>
-                                <div className="flex flex-col h-48 overflow-x-hidden overflow-y-auto">
-                                    {bgLayerPerf?.activeModels.map((model, i) => (
-                                        <p key={i}>"{model}"</p>
-                                    ))}
+                    {debugMode &&
+                        <div className="flex gap-3">
+                            {layerPerfStats.map((layerStats, idx) => (
+                                <div className="flex flex-col gap-1" key={idx}>
+                                    <p className="underline">{layerStats.layerName}</p>
+                                    <ul>
+                                        {layerStats.activeModels.map((model, idx) => (
+                                            <li key={idx}>{model.name} ({model.type})</li>
+                                        ))}
+                                    </ul>
                                 </div>
-                            </div>
-                        ) : (
-                            <p>-</p>
-                        )}
-                        {fgLayerPerf?.activeModels.length! > 0 ? (
-                            <div className="flex flex-col gap-2">
-                                <p>FG layer models ({fgLayerPerf?.activeModels.length}):</p>
-                                <div className="flex flex-col h-48 overflow-x-hidden overflow-y-auto">
-                                    {fgLayerPerf?.activeModels.map((model, i) => (
-                                        <p key={i}>"{model}"</p>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <p>-</p>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    }
                 </div>
             )}
         </div>

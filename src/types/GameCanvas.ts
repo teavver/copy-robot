@@ -10,11 +10,7 @@ export type GameCanvasProps = {
 export type GameCanvasHandle = {
     startLoop: () => void
     stopLoop: () => void
-
-
     playerMove: (dir: Direction) => void
     playerShoot: () => void
-
-    // debug
     getPerfStats: () => PerformanceStats
 }

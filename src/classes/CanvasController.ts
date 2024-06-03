@@ -153,16 +153,13 @@ export class CanvasController {
         player.shoot()
     }
 
-    ///// debug
+    ///// performance logging
     getPerfStats(): PerformanceStats {
         const fps = parseFloat(this.fps.toFixed(2))
-        const bgLayerPerf =
-            this.layers[GLOBALS.LAYERS.BACKGROUND].getPerfStats()
-        const fgLayerPerf =
-            this.layers[GLOBALS.LAYERS.FOREGROUND].getPerfStats()
+        const layerStats = Object.entries(this.layers).map(([, layer]) => layer.getPerfStats())
         return {
             fps,
-            layerStats: [bgLayerPerf, fgLayerPerf],
+            layerStats,
         }
     }
 
