@@ -111,7 +111,6 @@ export class CanvasController {
             const bulletModel = new Model(bulletData, {
                 size: { width: 1, height: 1 },
                 texture: "White",
-                collision: true
             }, "Bullet", playerBulletPos)
             this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
             player.data.isShooting = false

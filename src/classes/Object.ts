@@ -5,7 +5,6 @@ type Texture = ""
 export interface ObjectShape {
     size: Size                 // in BLOCKS, not px!
     texture: Texture | string // Path to .jpg, .png texture of CSS colorstring
-    collision: boolean
 }
 
 // Object is a blueprint for creating new Models and modifying the shapes,
@@ -24,9 +23,5 @@ export class Object {
 
     changeTexture(newTexture: Texture | string) {
         this.shape.texture = newTexture
-    }
-
-    changeCollision(newCollisionStatus: boolean) {
-        this.shape.collision = newCollisionStatus
     }
 }

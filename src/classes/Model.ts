@@ -28,10 +28,21 @@ export enum ModelType {
 export interface ModelData {
     type: ModelType
     state: ModelState
-    gravity: boolean
-    gravityDirection: Direction
-    displayCollision: boolean
+    gravityDirection?: Direction // Defaults to 'DOWN'. To disable entirely, use Direction.NONE
+    displayCollision?: boolean                                 // Defaults to 'false'
+    collisionScope?: ModelCollisionScope<CollisionScope>    // Defaults to 'SAME_LAYER'
 }
+
+export enum CollisionScope {
+    NONE, // Model with disabled collision
+    SAME_LAYER,
+    GLOBAL,
+    SINGLE_MODEL_TYPE
+}
+
+type ModelCollisionScope<T extends CollisionScope> = T extends CollisionScope.SINGLE_MODEL_TYPE
+    ? { modelType: ModelType }
+    : T
 
 export enum CollisionRectType {
     DETECT,
@@ -43,14 +54,13 @@ export class Model extends Object {
     type: ModelType
     pos: Position
     state: ModelState
-    gravity: boolean
     gravityDirection: Direction
     displayCollision: boolean
-    // placeholder for where model wants to move before applying physics
-    private moveIntent: Set<Direction>
-    // map for active collision contacts.
-    // so if the model is 'on the ground', the map will include Direction.DOWN
+    // Map of active collision directions. E.g. if on the ground: will include Direction.DOWN
     private collisionMap: Set<Direction>
+    // moveIntent holds a set of direction instructions, which are later evaluated by `simulatePhysics`
+    private moveIntent: Set<Direction>
+    private collisionScope: ModelCollisionScope<CollisionScope>
 
     constructor(
         data: ModelData,
@@ -63,11 +73,12 @@ export class Model extends Object {
         this.pos = initialPos
         this.type = data.type
         this.state = data.state
-        this.gravity = data.gravity
-        this.gravityDirection = data.gravityDirection
-        this.displayCollision = data.displayCollision
         this.moveIntent = new Set<Direction>()
+        this.gravityDirection = data.gravityDirection || Direction.DOWN // I always get DOWN, even if i pass it to constructor
+        this.displayCollision = data.displayCollision || false
         this.collisionMap = new Set<Direction>()
+        this.collisionScope = data.collisionScope || CollisionScope.SAME_LAYER
+        console.log('hello     ', this.name, Direction[this.gravityDirection])
     }
 
     // pretty useful for debugging
@@ -91,7 +102,8 @@ export class Model extends Object {
     }
 
     applyGravity() {
-        if (this.gravity) {
+        if (this.gravityDirection !== Direction.NONE) {
+            console.log(Direction[this.gravityDirection])
             this.addMoveIntent(this.gravityDirection)
         }
     }
@@ -126,6 +138,10 @@ export class Model extends Object {
 
     getCollisionMap(): Direction[] {
         return Array.from(this.collisionMap)
+    }
+
+    getCollisionScope(): ModelCollisionScope<CollisionScope> {
+        return this.collisionScope
     }
 
     // force = px per tick/frame

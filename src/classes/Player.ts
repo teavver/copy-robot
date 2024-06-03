@@ -19,9 +19,9 @@ export class Player extends Model {
             {
                 type: playerModel.type,
                 state: playerModel.state,
-                gravity: playerModel.gravity,
-                gravityDirection: Direction.DOWN,
+                gravityDirection: playerModel.gravityDirection,
                 displayCollision: playerModel.displayCollision,
+                collisionScope: playerModel.getCollisionScope()
             },
             playerModel.getShape(),
             playerModel.name,

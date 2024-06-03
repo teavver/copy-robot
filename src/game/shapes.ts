@@ -10,7 +10,6 @@ const bossCageFloorShape: ObjectShape = {
         height: 2,
     },
     texture: "Grey",
-    collision: true,
 }
 const bossCageWallShape: ObjectShape = {
     size: {
@@ -18,7 +17,6 @@ const bossCageWallShape: ObjectShape = {
         height: MAP_HEIGHT,
     },
     texture: "Grey",
-    collision: true,
 }
 
 const playerModelShape: ObjectShape = {
@@ -27,7 +25,6 @@ const playerModelShape: ObjectShape = {
         height: PLAYER_HEIGHT,
     },
     texture: "DimGrey",
-    collision: true,
 }
 
 export { bossCageFloorShape, bossCageWallShape, playerModelShape }

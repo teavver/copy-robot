@@ -1,4 +1,5 @@
 import { GLOBALS, TARGET_FPS } from "./game/globals"
+import { ModelType } from "./classes/Model"
 import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"
 import { Status } from "./types/Status"
@@ -11,7 +12,7 @@ function App() {
 
 
     // Performance debugging/logging
-    const [debugMode, setDebugMode] = useState<boolean>(false)
+    const [debugMode, setDebugMode] = useState<boolean>(true)
     const [layerPerfStats, setLayerPerfStats] = useState<LayerPerformanceStats[]>([])
     const [fps, setFps] = useState<number>(0)
 
@@ -26,7 +27,7 @@ function App() {
         if (!gc || !gc.current) return
         const intervalId = setInterval(() => {
             const perfStats = gc.current!.getPerfStats()
-            console.log('perf stats: ', perfStats)
+            // console.log('perf stats: ', perfStats)
             setFps(perfStats.fps)
             setLayerPerfStats(perfStats.layerStats)
         }, 1000)
@@ -66,6 +67,7 @@ function App() {
                         </button>
                         <button
                             tabIndex={-1}
+                            onKeyDown={(e) => e.key === ' ' && e.preventDefault()}
                             className="select-none focus:outline-none"
                             onClick={() => setDebugMode(debugMode => !debugMode)}
                         >
@@ -77,13 +79,15 @@ function App() {
                     {debugMode &&
                         <div className="flex gap-3">
                             {layerPerfStats.map((layerStats, idx) => (
-                                <div className="flex flex-col gap-1" key={idx}>
+                                <div className="flex flex-col gap-1">
                                     <p className="underline">{layerStats.layerName}</p>
-                                    <ul>
-                                        {layerStats.activeModels.map((model, idx) => (
-                                            <li key={idx}>{model.name} ({model.type})</li>
-                                        ))}
-                                    </ul>
+                                    <div className="flex flex-col gap-1 max-h-32 overflow-y-auto" key={idx}>
+                                        <ul>
+                                            {layerStats.activeModels.map((model, idx) => (
+                                                <li key={idx}>{model.name} ({ModelType[model.type]})</li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 </div>
                             ))}
                         </div>
