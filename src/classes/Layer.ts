@@ -1,4 +1,4 @@
-import { Model, ModelState, CollisionRectType, ModelType } from "./Model"
+import { Model, ModelState, CollisionRectType, ModelType, CollisionScope } from "./Model"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
@@ -95,6 +95,16 @@ export class Layer {
         baseModel: Model,
         targetModel: Model,
     ): [CollisionContactType, Direction] {
+
+        // return early if the baseModel is set to collide only with a specific Model type
+        // and the targetModel is not the targetType of that collision setting
+        if (
+            baseModel.collisionScope.scope === CollisionScope.SINGLE_MODEL_TYPE
+        ) {
+            if (targetModel.type !== baseModel.collisionScope.targetModelType)
+                return [CollisionContactType.NONE, Direction.NONE]
+        }
+
         // check intersection first
         const baseModelPosData: ModelPositionData = baseModel.getCollisionRect(
             CollisionRectType.ACTUAL,

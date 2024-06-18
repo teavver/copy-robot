@@ -6,6 +6,7 @@ import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRight
 import { blocksToCanvas } from "../game/utils"
 import { Bullet } from "./Bullet"
 import { logger } from "../game/logger"
+import { ModelType } from "./Model"
 
 const initModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player]
 
@@ -106,6 +107,7 @@ export class CanvasController {
             const bulletModel = new Bullet({
                 owner: player.name,
                 startingPos: playerBulletPos,
+                targetModelType: ModelType.ENEMY,
                 gravityDirection: player.data.faceDir
             })
 

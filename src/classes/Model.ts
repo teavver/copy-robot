@@ -31,7 +31,7 @@ export interface ModelData {
     state: ModelState
     gravityDirection?: Direction                            // Defaults to 'DOWN'. To disable use 'NONE'
     displayCollision?: boolean                              // Defaults to DRAW_COLLISION value in environment.ts
-    collisionScope?: ModelCollisionScope<CollisionScope>    // Defaults to 'SAME_LAYER'
+    collisionScope?: ModelCollisionScope    // Defaults to 'SAME_LAYER'
 }
 
 export enum CollisionScope {
@@ -41,9 +41,9 @@ export enum CollisionScope {
     SINGLE_MODEL_TYPE
 }
 
-type ModelCollisionScope<T extends CollisionScope> = T extends CollisionScope.SINGLE_MODEL_TYPE
-    ? { modelType: ModelType }
-    : T
+export type ModelCollisionScope =
+    | { scope: CollisionScope.NONE | CollisionScope.SAME_LAYER | CollisionScope.GLOBAL }
+    | { scope: CollisionScope.SINGLE_MODEL_TYPE; targetModelType: ModelType };
 
 export enum CollisionRectType {
     DETECT,
@@ -57,11 +57,12 @@ export class Model extends Object {
     state: ModelState
     gravityDirection: Direction
     displayCollision: boolean
+    // This determines how collisions should be handled for this Model
+    collisionScope: ModelCollisionScope
     // Map of active collision directions. E.g. if on the ground: will include Direction.DOWN
     private collisionMap: Set<Direction>
     // moveIntent holds a set of direction instructions, which are later evaluated by `simulatePhysics`
     private moveIntent: Set<Direction>
-    private collisionScope: ModelCollisionScope<CollisionScope>
 
     constructor(
         data: ModelData,
@@ -78,7 +79,7 @@ export class Model extends Object {
         this.gravityDirection = data.gravityDirection || Direction.DOWN
         this.displayCollision = data.displayCollision || ENV.DRAW_COLLISION
         this.collisionMap = new Set<Direction>()
-        this.collisionScope = data.collisionScope || CollisionScope.SAME_LAYER
+        this.collisionScope = data.collisionScope || { scope: CollisionScope.SAME_LAYER }
     }
 
     // pretty useful for debugging
@@ -139,7 +140,7 @@ export class Model extends Object {
         return Array.from(this.collisionMap)
     }
 
-    getCollisionScope(): ModelCollisionScope<CollisionScope> {
+    getCollisionScope(): ModelCollisionScope {
         return this.collisionScope
     }
 

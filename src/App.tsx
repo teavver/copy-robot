@@ -78,12 +78,12 @@ function App() {
                     {debugMode &&
                         <div className="flex gap-3">
                             {layerPerfStats.map((layerStats, idx) => (
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1" key={idx}>
                                     <p className="underline">{layerStats.layerName}</p>
-                                    <div className="flex flex-col gap-1 max-h-32 overflow-y-auto" key={idx}>
+                                    <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
                                         <ul>
                                             {layerStats.activeModels.map((model, idx) => (
-                                                <li key={idx}>{model.name} ({ModelType[model.type]})</li>
+                                                <li key={idx}>{model.name} [{ModelType[model.type]}]</li>
                                             ))}
                                         </ul>
                                     </div>
