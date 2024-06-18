@@ -19,7 +19,7 @@ export class Bullet extends Model {
                 type: ModelType.PROJECTILE,
                 state: ModelState.NORMAL,
                 gravityDirection: data.gravityDirection,
-                displayCollision: true
+                displayCollision: ENV.DRAW_COLLISION
             },
             {
                 size: {
@@ -28,7 +28,7 @@ export class Bullet extends Model {
                 },
                 texture: "White"
             },
-            `${data.owner}'s Bullet`,
+            `Bullet (${data.owner})`,
             data.startingPos
         )
 

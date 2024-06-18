@@ -7,6 +7,7 @@ import { Direction } from "../types/Direction"
 import { Position } from "../types/Position"
 import { ModelPositionData } from "./Layer"
 import { Object, ObjectShape } from "./Object"
+import ENV from "../environment"
 
 // Model is an extension of a `Shape`
 // contains non-abstract logic and can be drawn and manipulated from a Layer.
@@ -28,8 +29,8 @@ export enum ModelType {
 export interface ModelData {
     type: ModelType
     state: ModelState
-    gravityDirection?: Direction // Defaults to 'DOWN'. To disable entirely, use Direction.NONE
-    displayCollision?: boolean                                 // Defaults to 'false'
+    gravityDirection?: Direction                            // Defaults to 'DOWN'. To disable use 'NONE'
+    displayCollision?: boolean                              // Defaults to DRAW_COLLISION value in environment.ts
     collisionScope?: ModelCollisionScope<CollisionScope>    // Defaults to 'SAME_LAYER'
 }
 
@@ -75,7 +76,7 @@ export class Model extends Object {
         this.state = data.state
         this.moveIntent = new Set<Direction>()
         this.gravityDirection = data.gravityDirection || Direction.DOWN
-        this.displayCollision = data.displayCollision || false
+        this.displayCollision = data.displayCollision || ENV.DRAW_COLLISION
         this.collisionMap = new Set<Direction>()
         this.collisionScope = data.collisionScope || CollisionScope.SAME_LAYER
     }

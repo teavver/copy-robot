@@ -2,6 +2,7 @@ import { useRef, useEffect, useImperativeHandle, forwardRef } from "react"
 import { CanvasController } from "../classes/CanvasController"
 import { GameCanvasHandle, GameCanvasProps } from "../types/GameCanvas"
 import { Direction } from "../types/Direction"
+import { logger } from "../game/logger"
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     ({ width, height, framerate }, ref) => {
@@ -20,7 +21,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                     canvasRef.current,
                     framerate,
                 )
-                console.log("[game canvas] init ctx")
+                logger("[game canvas] init ctx")
             }
 
             const handleKeyDown = (e: KeyboardEvent) => {

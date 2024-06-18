@@ -5,6 +5,7 @@ import { PerformanceStats } from "../types/Performance"
 import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 import { blocksToCanvas } from "../game/utils"
 import { Bullet } from "./Bullet"
+import { logger } from "../game/logger"
 
 const initModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player]
 
@@ -49,7 +50,7 @@ export class CanvasController {
                 this.createLayerContext(),
                 GLOBALS.LAYERS.FOREGROUND,
             )
-            console.log("[CC] init OK")
+            logger("[CC] init OK")
         }
     }
 
@@ -63,7 +64,7 @@ export class CanvasController {
 
     private clearLayer(layer: string) {
         if (!this.layers[layer]) {
-            console.log(`[CC] cannot clear layer: does not exist (${layer})`)
+            logger(`[CC] cannot clear layer: does not exist (${layer})`)
             return
         }
         this.layers[layer].clear()
@@ -92,7 +93,7 @@ export class CanvasController {
 
         // PLAYER SHOOT DEMO
         if (player.data.isShooting) {
-            console.log(' shooot tick ')
+            logger(' shooot tick ')
 
             const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
                 ? player.pos.x - blocksToCanvas(PLAYER_WIDTH)

@@ -27,7 +27,6 @@ function App() {
         if (!gc || !gc.current) return
         const intervalId = setInterval(() => {
             const perfStats = gc.current!.getPerfStats()
-            // console.log('perf stats: ', perfStats)
             setFps(perfStats.fps)
             setLayerPerfStats(perfStats.layerStats)
         }, 1000)

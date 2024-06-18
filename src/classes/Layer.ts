@@ -6,6 +6,7 @@ import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
 import { Player } from "./Player"
 import { PLAYER_MOVE_SPEED, PROJECTILE_MOVE_SPEED } from "../game/globals"
+import { logger } from "../game/logger"
 
 enum CollisionContactType {
     NONE, // far away, not even in detection range
@@ -130,9 +131,9 @@ export class Layer {
         colType: CollisionContactType,
         colDir: Direction,
     ) {
-        // console.log(
-        //     `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
-        // )
+        logger(
+            `collision detected: (${baseModel.name}) => (${targetModel.name}) type: ${CollisionContactType[colType]}, dir: ${Direction[colDir]}`,
+        )
         if (colType === CollisionContactType.DIRECT) {
             baseModel.removeMoveIntent(colDir)
             baseModel.addCollision(colDir)
@@ -140,7 +141,7 @@ export class Layer {
     }
 
     private addModel(model: Model) {
-        console.log(
+        logger(
             `[${this.name}] layer model added: ${JSON.stringify(model, null, 2)}`,
         )
         if (model.type === ModelType.PLAYER) {
@@ -151,7 +152,7 @@ export class Layer {
     }
 
     private removeModel(model: Model) {
-        console.log(
+        logger(
             `[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`,
         )
         if (model.type === ModelType.PLAYER) {
@@ -177,7 +178,7 @@ export class Layer {
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
         const mPosData: ModelPositionData = { pos: model.pos, size: mSizePx }
-        // console.log(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model)}`)
+        logger(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model, mPosData)}`)
 
         if (
             !this.isModelActive(model) ||
