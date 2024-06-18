@@ -12,7 +12,7 @@ interface PlayerData {
 }
 
 export class Player extends Model {
-    data: PlayerData
+    public data: PlayerData
 
     constructor(playerModel: Model) {
         super(

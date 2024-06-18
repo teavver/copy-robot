@@ -74,11 +74,10 @@ export class Model extends Object {
         this.type = data.type
         this.state = data.state
         this.moveIntent = new Set<Direction>()
-        this.gravityDirection = data.gravityDirection || Direction.DOWN // I always get DOWN, even if i pass it to constructor
+        this.gravityDirection = data.gravityDirection || Direction.DOWN
         this.displayCollision = data.displayCollision || false
         this.collisionMap = new Set<Direction>()
         this.collisionScope = data.collisionScope || CollisionScope.SAME_LAYER
-        console.log('hello     ', this.name, Direction[this.gravityDirection])
     }
 
     // pretty useful for debugging
@@ -103,7 +102,6 @@ export class Model extends Object {
 
     applyGravity() {
         if (this.gravityDirection !== Direction.NONE) {
-            console.log(Direction[this.gravityDirection])
             this.addMoveIntent(this.gravityDirection)
         }
     }

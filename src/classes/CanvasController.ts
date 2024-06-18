@@ -4,7 +4,7 @@ import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 import { blocksToCanvas } from "../game/utils"
-import { ModelType, ModelState, Model } from "./Model"
+import { Bullet } from "./Bullet"
 
 const initModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player]
 
@@ -93,14 +93,7 @@ export class CanvasController {
         // PLAYER SHOOT DEMO
         if (player.data.isShooting) {
             console.log(' shooot tick ')
-            const bulletData = {
-                type: ModelType.PROJECTILE,
-                state: ModelState.NORMAL,
-                gravity: true,
-                gravityDirection: player.data.faceDir,
-                displayCollision: true,
-            }
-            console.log(bulletData)
+
             const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
                 ? player.pos.x - blocksToCanvas(PLAYER_WIDTH)
                 : player.pos.x + blocksToCanvas(PLAYER_WIDTH)
@@ -108,10 +101,13 @@ export class CanvasController {
                 x: bulletStartPosX,
                 y: player.pos.y + blocksToCanvas(PLAYER_HEIGHT / 2),
             }
-            const bulletModel = new Model(bulletData, {
-                size: { width: 1, height: 1 },
-                texture: "White",
-            }, "Bullet", playerBulletPos)
+
+            const bulletModel = new Bullet({
+                owner: player.name,
+                startingPos: playerBulletPos,
+                gravityDirection: player.data.faceDir
+            })
+
             this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
             player.data.isShooting = false
         }
