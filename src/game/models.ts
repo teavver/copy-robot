@@ -1,5 +1,5 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
-import { MAP_WIDTH, MAP_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT } from "./globals"
+import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
 import { Player } from "../classes/Player"
 import {
     playerModelShape,

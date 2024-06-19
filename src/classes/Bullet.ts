@@ -27,9 +27,8 @@ export class Bullet extends Model {
                     targetModelType: data.targetModelType
                 },
 
-                onDirectCollision(self, targetModel) {
-                    console.log('test ', self.name, 'target ', targetModel.name)
-                    self.modifyState(ModelState.DESTROYED)
+                onDirectCollision(self) {
+                    return self.modifyState(ModelState.DESTROYED)
                 },
             },
             {

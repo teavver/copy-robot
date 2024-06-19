@@ -1,4 +1,3 @@
-import ENV from "../environment"
 import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals"
 import { Direction } from "../types/Direction"
 import { Model, ModelState } from "./Model"

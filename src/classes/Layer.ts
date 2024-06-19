@@ -44,6 +44,9 @@ export class Layer {
     private activeProjectileModels: Bullet[] = []
     private activeTerrainModels: Model[] = []
 
+    // Keep this array in-memory for faster access. Requires an update on each frame
+    private allActiveModels: Model[] = []
+
     // This solution seems verbose, but by grouping activeModels by the Model type inside them,
     // it's easier to manage them and keep track of garbage collection
     private ActiveModelListMap: ActiveModelsArrayMap = {
@@ -67,9 +70,14 @@ export class Layer {
         return this.ActiveModelListMap[modelType]
     }
 
-    // Get all activeModels in one array (flattened)
-    private getAllActiveModels(): Model[] {
-        return Object.values(this.ActiveModelListMap).flat()
+    // // Get all activeModels in one array (flattened)
+    // private getAllActiveModels(): Model[] {
+    //     return Object.values(this.ActiveModelListMap).flat()
+    // }
+
+    // TEST
+    public updateActiveModels() {
+        this.allActiveModels = Object.values(this.ActiveModelListMap).flat()
     }
 
     // (GC check) Destroy all objects that are outside the canvas view
@@ -92,19 +100,19 @@ export class Layer {
     // (GC) Remove model from its model type active models array
     private destroyActiveModel(model: Model) {
         model.modifyState(ModelState.DESTROYED)
-        if (model.onDestroy) model.onDestroy()
         this.removeModel(model)
+        if (model.onDestroy) model.onDestroy()
     }
 
     // detect & return list of models in detection range from baseModel
     // modelSize in px
-    private detectNearbyModels(baseModel: Model, allActiveModels: Model[]): Model[] {
+    private detectNearbyModels(baseModel: Model): Model[] {
         const nearbyModels: Model[] = []
         const baseModelColRect = baseModel.getCollisionRect(
             CollisionRectType.DETECT,
         )
 
-        allActiveModels.forEach((model: Model) => {
+        this.allActiveModels.forEach((model: Model) => {
             // skip checking the base model with itself
             if (
                 baseModel.pos.x === model.pos.x &&
@@ -185,9 +193,8 @@ export class Layer {
     }
 
     private addModel(model: Model) {
-        logger(`[${this.name}]: Model added: ${JSON.stringify(model, null, 2)}`);
+        logger(`[${this.name}]: Model added: ${JSON.stringify(model, null)}`);
         (this.ActiveModelListMap[model.type] as (typeof model)[]).push(model)
-        console.log(`${ModelType[model.type]}: `, this.ActiveModelListMap[model.type])
     }
 
     private removeModel(model: Model) {
@@ -196,7 +203,7 @@ export class Layer {
         var index = this.ActiveModelListMap[model.type].indexOf(model);
         if (index !== -1) {
             this.ActiveModelListMap[model.type].splice(index, 1);
-            logger(`[${this.name}]: Model removed: ${JSON.stringify(model, null, 2)}`, 0);
+            logger(`[${this.name}]: Model removed: ${JSON.stringify(model, null, 2)}`);
         }
     }
 
@@ -210,26 +217,9 @@ export class Layer {
         posX: number = model.pos.x,
         posY: number = model.pos.y,
     ) {
-        // do not draw inactive and destroyed models
-        if (model.state === ModelState.DESTROYED) return
 
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
-        const mPosData: ModelPositionData = { pos: model.pos, size: mSizePx }
-
-        // DEBUG
-        // logger(`model name: ${model.name}, isActive: ${this.isModelActive(model)}`, 0)
-        // logger(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(mPosData)}`, 0)
-
-        if (
-            !this.isModelActive(model) ||
-            this.isModelOutOfBounds(mPosData)
-        ) {
-            console.log("================ DESTROY=================")
-            this.destroyActiveModel(model)
-            return
-        }
-
         this.context.fillStyle = mShape.texture
 
         this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
@@ -268,7 +258,7 @@ export class Layer {
     getPerfStats(): LayerPerformanceStats {
         return {
             layerName: this.name,
-            activeModels: this.getAllActiveModels().map((m) => ({
+            activeModels: this.allActiveModels.map((m) => ({
                 type: m.type,
                 name: m.name,
             })),
@@ -276,8 +266,7 @@ export class Layer {
     }
 
     drawActiveModels() {
-        const allModels = this.getAllActiveModels()
-        allModels.forEach(model => {
+        this.allActiveModels.forEach(model => {
             this.drawModel(model)
         })
     }
@@ -291,18 +280,35 @@ export class Layer {
         this.context.clearRect(0, 0, canvas.width, canvas.height)
     }
 
+    private checkForModelCleanup(model: Model): boolean {
+        const mShape = model.getShape()
+        const mSizePx = blockRectToCanvas(mShape.size)
+        const mPosData: ModelPositionData = { pos: model.pos, size: mSizePx }
+        // TODO: add garbage collection logs for LOG=2
+        if (
+            !this.isModelActive(model) ||
+            this.isModelDestroyed(model) ||
+            this.isModelOutOfBounds(mPosData)
+        ) {
+            this.destroyActiveModel(model)
+            return true
+        }
+        return false
+    }
+
     // Simulate physics for all models that belong to this layer
     // The order of physics ops in this case is:
     // Read Movement intent from objects => Apply Gravity => Apply Collision checks => Movement execution
     simulatePhysics() {
-        const allActiveModels = this.getAllActiveModels()
+        this.allActiveModels.forEach((model) => {
 
-        allActiveModels.forEach((model) => {
-            // cant escape gravity bro
+            // run per-model GC routine
+            if (this.checkForModelCleanup(model)) return
+
             model.applyGravity()
 
             // if there are models nearby, run a collision check
-            const nearbyModels = this.detectNearbyModels(model, allActiveModels)
+            const nearbyModels = this.detectNearbyModels(model)
             if (nearbyModels.length > 0) {
                 nearbyModels.forEach((nearbyModel) => {
                     const [colType, colDir] = this.detectCollisionType(

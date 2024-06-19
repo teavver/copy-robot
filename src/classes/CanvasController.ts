@@ -6,7 +6,7 @@ import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCag
 import { blocksToCanvas } from "../game/utils"
 import { Bullet } from "./Bullet"
 import { logger } from "../game/logger"
-import { Model, ModelType } from "./Model"
+import { ModelType } from "./Model"
 
 // Spawn these models at the beginning of a run
 const initFgModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player, boss]
@@ -88,15 +88,17 @@ export class CanvasController {
     // main draw loop
     private draw() {
 
+        // clear
         Object.keys(this.layers).forEach(layer => this.clearLayer(layer))
+
+        // update models
+        Object.values(this.layers).forEach((layer: Layer) => layer.updateActiveModels())
 
         // fg
         this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
 
         // PLAYER SHOOT DEMO
         if (player.data.isShooting) {
-            logger(' shooot tick ')
-
             const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
                 ? player.pos.x - blocksToCanvas(PLAYER_WIDTH)
                 : player.pos.x + blocksToCanvas(PLAYER_WIDTH)
