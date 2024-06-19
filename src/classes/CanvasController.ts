@@ -2,13 +2,14 @@ import { SECOND_IN_MS, GLOBALS, PLAYER_HEIGHT, PLAYER_WIDTH, TARGET_FPS } from "
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
-import { player, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
+import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 import { blocksToCanvas } from "../game/utils"
 import { Bullet } from "./Bullet"
 import { logger } from "../game/logger"
 import { ModelType } from "./Model"
 
-const initModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player]
+// Spawn these models at the beginning of a run
+const initFgModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player, boss]
 
 export class CanvasController {
     // ctx, layers
@@ -169,7 +170,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels(initModels)
+            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels(initFgModels)
         }
     }
 
@@ -184,6 +185,6 @@ export class CanvasController {
         this.fps = 0
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeActiveModels(initModels)
+        this.layers[GLOBALS.LAYERS.FOREGROUND].removeActiveModels(initFgModels)
     }
 }

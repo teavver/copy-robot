@@ -1,6 +1,7 @@
 import { Direction } from "../types/Direction";
 import { Position } from "../types/Position";
-import { CollisionScope, Model, ModelState, ModelType } from "./Model";
+import { Model, ModelState, ModelType } from "./Model";
+import { CollisionScope } from "../types/Collision";
 import ENV from "../environment";
 
 export interface BulletData {

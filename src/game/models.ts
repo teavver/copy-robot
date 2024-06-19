@@ -26,6 +26,22 @@ const playerModel = new Model(
 )
 const player = new Player(playerModel)
 
+// ======= BOSS
+const bossModel = new Model(
+    {
+        type: ModelType.ENEMY,
+        state: ModelState.NORMAL,
+        gravityDirection: Direction.DOWN,
+        displayCollision: ENV.DRAW_COLLISION,
+    },
+    playerModelShape,
+    "Enemy",
+    { x: blocksToCanvas(14), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
+)
+
+// TODO: Implement 'BOss' class later
+const boss = new Player(bossModel)
+
 // ======== BOSS CAGE
 const bossCageWidth = 2 //blocks
 const bossCageBase = {
@@ -59,4 +75,4 @@ const bossCageCeiling = new Model(
     { x: 0, y: 0 },
 )
 
-export { playerModel, player, bossCageLeftWall, bossCageRightWall, bossCageFloor, bossCageCeiling }
+export { playerModel, player, boss, bossCageLeftWall, bossCageRightWall, bossCageFloor, bossCageCeiling }

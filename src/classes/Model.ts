@@ -2,6 +2,7 @@ import {
     COLLISION_DETECTION_FIELD_SIZE_PX,
     PLAYER_MOVE_SPEED,
 } from "../game/globals"
+import { ModelCollisionScope, CollisionScope, CollisionRectType } from "../types/Collision"
 import { blockRectToCanvas } from "../game/utils"
 import { Direction } from "../types/Direction"
 import { Position } from "../types/Position"
@@ -31,23 +32,11 @@ export interface ModelData {
     state: ModelState
     gravityDirection?: Direction                            // Defaults to 'DOWN'. To disable use 'NONE'
     displayCollision?: boolean                              // Defaults to DRAW_COLLISION value in environment.ts
-    collisionScope?: ModelCollisionScope    // Defaults to 'SAME_LAYER'
-}
+    collisionScope?: ModelCollisionScope                    // Defaults to 'SAME_LAYER'
 
-export enum CollisionScope {
-    NONE, // Model with disabled collision
-    SAME_LAYER,
-    GLOBAL,
-    SINGLE_MODEL_TYPE
-}
-
-export type ModelCollisionScope =
-    | { scope: CollisionScope.NONE | CollisionScope.SAME_LAYER | CollisionScope.GLOBAL }
-    | { scope: CollisionScope.SINGLE_MODEL_TYPE; targetModelType: ModelType };
-
-export enum CollisionRectType {
-    DETECT,
-    ACTUAL,
+    // TODO: Implement: Custom callbacks on events
+    onCollision?: () => void
+    onDestroy?: () => void
 }
 
 export class Model extends Object {

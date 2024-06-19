@@ -1,4 +1,5 @@
-import { Model, ModelState, CollisionRectType, ModelType, CollisionScope } from "./Model"
+import { Model, ModelState, ModelType } from "./Model"
+import { CollisionRectType, CollisionScope } from "../types/Collision"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
@@ -90,7 +91,7 @@ export class Layer {
         return nearbyModels
     }
 
-    // not sure if i'll need a more sophisticated collisionType in the future
+    // Calc distance between two objects and 
     private detectCollisionType(
         baseModel: Model,
         targetModel: Model,
@@ -105,7 +106,7 @@ export class Layer {
                 return [CollisionContactType.NONE, Direction.NONE]
         }
 
-        // check intersection first
+        // check direct object intersection
         const baseModelPosData: ModelPositionData = baseModel.getCollisionRect(
             CollisionRectType.ACTUAL,
         )
