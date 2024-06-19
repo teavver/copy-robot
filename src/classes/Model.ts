@@ -22,7 +22,7 @@ export enum ModelState {
 
 export enum ModelType {
     PLAYER, // reserved for player
-    ENEMY, // this usually means the model is "killable"
+    ENEMY, // reserved for enemies (Boss included)
     TERRAIN, // collision on, but not killable
     PROJECTILE // bullets
 }
@@ -34,8 +34,8 @@ export interface ModelData {
     displayCollision?: boolean                              // Defaults to DRAW_COLLISION value in environment.ts
     collisionScope?: ModelCollisionScope                    // Defaults to 'SAME_LAYER'
 
-    // TODO: Implement: Custom callbacks on events
-    onCollision?: () => void
+    // Custom per-model callbacks on specific events during game loop
+    onDirectCollision?: (self: Model, targetModel: Model) => void
     onDestroy?: () => void
 }
 
@@ -46,12 +46,14 @@ export class Model extends Object {
     state: ModelState
     gravityDirection: Direction
     displayCollision: boolean
-    // This determines how collisions should be handled for this Model
+    // This determines this Models' behavior during collisions
     collisionScope: ModelCollisionScope
     // Map of active collision directions. E.g. if on the ground: will include Direction.DOWN
     private collisionMap: Set<Direction>
     // moveIntent holds a set of direction instructions, which are later evaluated by `simulatePhysics`
     private moveIntent: Set<Direction>
+    onDirectCollision: ((s: Model, tM: Model) => void) | undefined
+    onDestroy: (() => void) | undefined
 
     constructor(
         data: ModelData,
@@ -69,6 +71,8 @@ export class Model extends Object {
         this.displayCollision = data.displayCollision || ENV.DRAW_COLLISION
         this.collisionMap = new Set<Direction>()
         this.collisionScope = data.collisionScope || { scope: CollisionScope.SAME_LAYER }
+        this.onDirectCollision = data.onDirectCollision
+        this.onDestroy = data.onDestroy
     }
 
     // pretty useful for debugging

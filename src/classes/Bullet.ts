@@ -25,7 +25,12 @@ export class Bullet extends Model {
                 collisionScope: {
                     scope: CollisionScope.SINGLE_MODEL_TYPE,
                     targetModelType: data.targetModelType
-                }
+                },
+
+                onDirectCollision(self, targetModel) {
+                    console.log('test ', self.name, 'target ', targetModel.name)
+                    self.modifyState(ModelState.DESTROYED)
+                },
             },
             {
                 size: {

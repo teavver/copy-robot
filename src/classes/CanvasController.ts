@@ -6,7 +6,7 @@ import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCag
 import { blocksToCanvas } from "../game/utils"
 import { Bullet } from "./Bullet"
 import { logger } from "../game/logger"
-import { ModelType } from "./Model"
+import { Model, ModelType } from "./Model"
 
 // Spawn these models at the beginning of a run
 const initFgModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player, boss]
@@ -109,7 +109,7 @@ export class CanvasController {
                 owner: player.name,
                 startingPos: playerBulletPos,
                 targetModelType: ModelType.ENEMY,
-                gravityDirection: player.data.faceDir
+                gravityDirection: player.data.faceDir,
             })
 
             this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels([bulletModel])

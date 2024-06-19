@@ -8,6 +8,7 @@ import { Direction } from "../types/Direction"
 import { Player } from "./Player"
 import { PLAYER_MOVE_SPEED, PROJECTILE_MOVE_SPEED } from "../game/globals"
 import { logger } from "../game/logger"
+import { Bullet } from "./Bullet"
 
 enum CollisionContactType {
     NONE, // far away, not even in detection range
@@ -20,59 +21,90 @@ export interface ModelPositionData {
     size: Size
 }
 
+type ModelMap = {
+    [ModelType.ENEMY]: Player
+    [ModelType.PLAYER]: Player
+    [ModelType.PROJECTILE]: Bullet
+    [ModelType.TERRAIN]: Model
+}
+
+// For each ModelType, store an array of active Models of that type
+// e.g. [ModelType.PLAYER]: Player[]
+type ActiveModelsArrayMap = {
+    [K in ModelType]: ModelMap[K][]
+}
+
 export class Layer {
     name: string
     private context: CanvasRenderingContext2D
 
     // List of active (visible) models that this layer is responsible for rendering
-    private activeModels: Model[]
-    private activePlayers: Player[]
+    private activeEnemyModels: Player[] = []
+    private activePlayerModels: Player[] = []
+    private activeProjectileModels: Bullet[] = []
+    private activeTerrainModels: Model[] = []
+
+    // This solution seems verbose, but by grouping activeModels by the Model type inside them,
+    // it's easier to manage them and keep track of garbage collection
+    private ActiveModelListMap: ActiveModelsArrayMap = {
+        [ModelType.ENEMY]: this.activeEnemyModels,
+        [ModelType.PLAYER]: this.activePlayerModels,
+        [ModelType.PROJECTILE]: this.activeProjectileModels,
+        [ModelType.TERRAIN]: this.activeTerrainModels,
+    }
 
     constructor(context: CanvasRenderingContext2D, name: string) {
         this.name = name
         this.context = context
-        this.activeModels = []
-        this.activePlayers = []
     }
 
     private isModelActive(model: Model) {
-        if (model.type === ModelType.PLAYER) {
-            return this.activePlayers.includes(model as Player)
-        }
-        return this.activeModels.includes(model)
+        return this.getActiveModelsByType(model.type).includes(model)
     }
 
+    // Get all activeModels of one specific ModelType
+    private getActiveModelsByType<T extends ModelType>(modelType: T): ModelMap[T][] {
+        return this.ActiveModelListMap[modelType]
+    }
+
+    // Get all activeModels in one array (flattened)
     private getAllActiveModels(): Model[] {
-        return [...this.activeModels, ...this.activePlayers]
+        return Object.values(this.ActiveModelListMap).flat()
     }
 
-    // destroy objects that fall out of the map (basic GC)
-    private isModelOutOfBounds(
-        model: Model,
-        mPosData: ModelPositionData,
-    ): boolean {
+    // (GC check) Destroy all objects that are outside the canvas view
+    private isModelOutOfBounds(mPosData: ModelPositionData): boolean {
         const { width, height } = this.context.canvas
         const canvasPosData: ModelPositionData = {
             pos: { x: 0, y: 0 },
             size: { width, height },
         }
         const [inBounds] = areRectsIntersecting(mPosData, canvasPosData)
-        if (!inBounds) {
-            model.modifyState(ModelState.DESTROYED)
-            this.removeModel(model)
-            return true
-        }
+        if (!inBounds) return true
         return false
+    }
+
+    // (GC check) Check if ModelState is "DESTROYED" - if yes, remove it from the render loop
+    private isModelDestroyed(model: Model) {
+        return model.state === ModelState.DESTROYED
+    }
+
+    // (GC) Remove model from its model type active models array
+    private destroyActiveModel(model: Model) {
+        model.modifyState(ModelState.DESTROYED)
+        if (model.onDestroy) model.onDestroy()
+        this.removeModel(model)
     }
 
     // detect & return list of models in detection range from baseModel
     // modelSize in px
-    private detectNearbyModels(baseModel: Model): Model[] {
+    private detectNearbyModels(baseModel: Model, allActiveModels: Model[]): Model[] {
         const nearbyModels: Model[] = []
         const baseModelColRect = baseModel.getCollisionRect(
             CollisionRectType.DETECT,
         )
-        this.activeModels.forEach((model: Model, idx) => {
+
+        allActiveModels.forEach((model: Model) => {
             // skip checking the base model with itself
             if (
                 baseModel.pos.x === model.pos.x &&
@@ -85,7 +117,7 @@ export class Layer {
                 CollisionRectType.DETECT,
             )
             if (areRectsIntersecting(baseModelColRect, activeModelColRect)) {
-                nearbyModels.push(this.activeModels[idx])
+                nearbyModels.push(model)
             }
         })
         return nearbyModels
@@ -148,29 +180,24 @@ export class Layer {
         if (colType === CollisionContactType.DIRECT) {
             baseModel.removeMoveIntent(colDir)
             baseModel.addCollision(colDir)
+            if (baseModel.onDirectCollision) baseModel.onDirectCollision(baseModel, targetModel)
         }
     }
 
     private addModel(model: Model) {
-        logger(
-            `[${this.name}] layer model added: ${JSON.stringify(model, null, 2)}`,
-        )
-        if (model.type === ModelType.PLAYER) {
-            this.activePlayers.push(model as Player)
-            return
-        }
-        this.activeModels.push(model)
+        logger(`[${this.name}]: Model added: ${JSON.stringify(model, null, 2)}`);
+        (this.ActiveModelListMap[model.type] as (typeof model)[]).push(model)
+        console.log(`${ModelType[model.type]}: `, this.ActiveModelListMap[model.type])
     }
 
     private removeModel(model: Model) {
-        logger(
-            `[${this.name}] layer model removed: ${JSON.stringify(model, null, 2)}`,
-        )
-        if (model.type === ModelType.PLAYER) {
-            this.activePlayers = this.activePlayers.filter((m) => m !== model)
-            return
+        // TODO: Implement a better solution (type-safe)
+        // @ts-ignore
+        var index = this.ActiveModelListMap[model.type].indexOf(model);
+        if (index !== -1) {
+            this.ActiveModelListMap[model.type].splice(index, 1);
+            logger(`[${this.name}]: Model removed: ${JSON.stringify(model, null, 2)}`, 0);
         }
-        this.activeModels = this.activeModels.filter((m) => m !== model)
     }
 
     /**
@@ -189,12 +216,17 @@ export class Layer {
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
         const mPosData: ModelPositionData = { pos: model.pos, size: mSizePx }
-        logger(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(model, mPosData)}`)
+
+        // DEBUG
+        // logger(`model name: ${model.name}, isActive: ${this.isModelActive(model)}`, 0)
+        // logger(`model name: ${model.name}, isOutOfBounds: ${this.isModelOutOfBounds(mPosData)}`, 0)
 
         if (
             !this.isModelActive(model) ||
-            this.isModelOutOfBounds(model, mPosData)
+            this.isModelOutOfBounds(mPosData)
         ) {
+            console.log("================ DESTROY=================")
+            this.destroyActiveModel(model)
             return
         }
 
@@ -223,10 +255,12 @@ export class Layer {
         }
     }
 
+    // Remove Model(s) from activeModels list
     removeActiveModels(models: Model[]) {
         models.forEach(m => this.removeModel(m))
     }
 
+    // Add Model(s) to activeModels list
     addActiveModels(models: Model[]) {
         models.forEach(m => this.addModel(m))
     }
@@ -261,13 +295,14 @@ export class Layer {
     // The order of physics ops in this case is:
     // Read Movement intent from objects => Apply Gravity => Apply Collision checks => Movement execution
     simulatePhysics() {
-        const allModels = this.getAllActiveModels()
-        allModels.forEach((model) => {
+        const allActiveModels = this.getAllActiveModels()
+
+        allActiveModels.forEach((model) => {
             // cant escape gravity bro
             model.applyGravity()
 
             // if there are models nearby, run a collision check
-            const nearbyModels = this.detectNearbyModels(model)
+            const nearbyModels = this.detectNearbyModels(model, allActiveModels)
             if (nearbyModels.length > 0) {
                 nearbyModels.forEach((nearbyModel) => {
                     const [colType, colDir] = this.detectCollisionType(
