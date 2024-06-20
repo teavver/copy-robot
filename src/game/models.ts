@@ -35,7 +35,7 @@ const bossModel = new Model(
         displayCollision: ENV.DRAW_COLLISION,
     },
     playerModelShape,
-    "Enemy",
+    "Boss",
     { x: blocksToCanvas(14), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
 )
 

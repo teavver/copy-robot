@@ -55,6 +55,10 @@ export class Player extends Model {
         }
     }
 
+    changeHealth(newVal: number) {
+        this.data.health = newVal
+    }
+
     private jump() {
         if (this.data.isJumping) return
         this.data.jumpFrame++
@@ -95,7 +99,9 @@ export class Player extends Model {
         }
 
         // die
+        console.log(this.data.health)
         if (this.data.health < 1) {
+            console.log('die')
             this.modifyState(ModelState.DESTROYED)
         }
     }

@@ -70,16 +70,6 @@ export class Layer {
         return this.ActiveModelListMap[modelType]
     }
 
-    // // Get all activeModels in one array (flattened)
-    // private getAllActiveModels(): Model[] {
-    //     return Object.values(this.ActiveModelListMap).flat()
-    // }
-
-    // TEST
-    public updateActiveModels() {
-        this.allActiveModels = Object.values(this.ActiveModelListMap).flat()
-    }
-
     // (GC check) Destroy all objects that are outside the canvas view
     private isModelOutOfBounds(mPosData: ModelPositionData): boolean {
         const { width, height } = this.context.canvas
@@ -245,6 +235,11 @@ export class Layer {
         }
     }
 
+    // Active models are updated on each frame, before any logic is executed
+    updateActiveModels() {
+        this.allActiveModels = Object.values(this.ActiveModelListMap).flat()
+    }
+
     // Remove Model(s) from activeModels list
     removeActiveModels(models: Model[]) {
         models.forEach(m => this.removeModel(m))
@@ -302,6 +297,7 @@ export class Layer {
     simulatePhysics() {
         this.allActiveModels.forEach((model) => {
 
+
             // run per-model GC routine
             if (this.checkForModelCleanup(model)) return
 
@@ -326,12 +322,16 @@ export class Layer {
                 })
             }
 
-            if (model.type === ModelType.PLAYER) {
+            // TODO: simplify this once Enemy/Boss class is implemented
+            if (model.type === ModelType.PLAYER || model.type === ModelType.ENEMY) {
                 const player = model as Player
                 player.updateData()
             }
 
-            const moveForce = (model.type === ModelType.PROJECTILE) ? PROJECTILE_MOVE_SPEED : PLAYER_MOVE_SPEED // TEMP HERE
+            // TEMP HERE
+            const moveForce = (model.type === ModelType.PROJECTILE)
+                ? PROJECTILE_MOVE_SPEED
+                : PLAYER_MOVE_SPEED
             model.applyMoveIntentForce(moveForce)
             model.resetMoveIntent()
             model.resetCollisionMap()
