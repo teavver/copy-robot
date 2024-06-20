@@ -5,7 +5,7 @@ import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
-import { Player } from "./Player"
+import { Character } from "./Character"
 import { PLAYER_MOVE_SPEED, PROJECTILE_MOVE_SPEED } from "../game/globals"
 import { logger } from "../game/logger"
 import { Bullet } from "./Bullet"
@@ -22,8 +22,8 @@ export interface ModelPositionData {
 }
 
 type ModelMap = {
-    [ModelType.ENEMY]: Player
-    [ModelType.PLAYER]: Player
+    [ModelType.ENEMY]: Character
+    [ModelType.PLAYER]: Character
     [ModelType.PROJECTILE]: Bullet
     [ModelType.TERRAIN]: Model
 }
@@ -39,8 +39,8 @@ export class Layer {
     private context: CanvasRenderingContext2D
 
     // List of active (visible) models that this layer is responsible for rendering
-    private activeEnemyModels: Player[] = []
-    private activePlayerModels: Player[] = []
+    private activeEnemyModels: Character[] = []
+    private activePlayerModels: Character[] = []
     private activeProjectileModels: Bullet[] = []
     private activeTerrainModels: Model[] = []
 
@@ -297,7 +297,6 @@ export class Layer {
     simulatePhysics() {
         this.allActiveModels.forEach((model) => {
 
-
             // run per-model GC routine
             if (this.checkForModelCleanup(model)) return
 
@@ -322,13 +321,12 @@ export class Layer {
                 })
             }
 
-            // TODO: simplify this once Enemy/Boss class is implemented
-            if (model.type === ModelType.PLAYER || model.type === ModelType.ENEMY) {
-                const player = model as Player
-                player.updateData()
+            // Handle character models (Player, Enemy, Boss etc.)
+            if (model instanceof Character) {
+                model.updateData()
             }
 
-            // TEMP HERE
+            // TODO: After Projectile class, (if needed), implement custom projectile speed
             const moveForce = (model.type === ModelType.PROJECTILE)
                 ? PROJECTILE_MOVE_SPEED
                 : PLAYER_MOVE_SPEED

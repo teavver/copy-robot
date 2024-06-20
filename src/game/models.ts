@@ -1,6 +1,6 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
 import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
-import { Player } from "../classes/Player"
+import { Character } from "../classes/Character"
 import {
     playerModelShape,
     bossCageWallShape,
@@ -24,7 +24,7 @@ const playerModel = new Model(
     "Player",
     { x: blocksToCanvas(4), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
 )
-const player = new Player(playerModel)
+const player = new Character(playerModel)
 
 // ======= BOSS
 const bossModel = new Model(
@@ -40,7 +40,7 @@ const bossModel = new Model(
 )
 
 // TODO: Implement 'BOss' class later
-const boss = new Player(bossModel)
+const boss = new Character(bossModel)
 
 // ======== BOSS CAGE
 const bossCageWidth = 2 //blocks

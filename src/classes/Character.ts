@@ -2,36 +2,36 @@ import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals"
 import { Direction } from "../types/Direction"
 import { Model, ModelState } from "./Model"
 
-interface PlayerData {
+interface CharacterData {
     health: number
+    faceDir: Direction
     isShooting: boolean
     shootCooldown: number
-    isJumping: boolean
+    isAirborne: boolean
     jumpFrame: number   // jump height blocker
-    faceDir: Direction
 }
 
-export class Player extends Model {
-    public data: PlayerData
+export class Character extends Model {
+    public data: CharacterData
 
-    constructor(playerModel: Model) {
+    constructor(charModel: Model) {
         super(
             {
-                type: playerModel.type,
-                state: playerModel.state,
-                gravityDirection: playerModel.gravityDirection,
-                displayCollision: playerModel.displayCollision,
-                collisionScope: playerModel.getCollisionScope()
+                type: charModel.type,
+                state: charModel.state,
+                gravityDirection: charModel.gravityDirection,
+                displayCollision: charModel.displayCollision,
+                collisionScope: charModel.getCollisionScope()
             },
-            playerModel.getShape(),
-            playerModel.name,
-            playerModel.pos,
+            charModel.getShape(),
+            charModel.name,
+            charModel.pos,
         )
 
         this.data = {
             health: 100,
             jumpFrame: 0,
-            isJumping: false,
+            isAirborne: false,
             isShooting: false,
             shootCooldown: 0,
             faceDir: Direction.RIGHT
@@ -40,7 +40,7 @@ export class Player extends Model {
 
     shoot() {
         if (this.data.shootCooldown > 0) return
-        this.data.shootCooldown += 30 // TODO: Find good value
+        this.data.shootCooldown += 20
         this.data.isShooting = true
     }
 
@@ -60,19 +60,19 @@ export class Player extends Model {
     }
 
     private jump() {
-        if (this.data.isJumping) return
+        if (this.data.isAirborne) return
         this.data.jumpFrame++
-        this.data.isJumping = true
+        this.data.isAirborne = true
         this.addMoveIntent(Direction.UP)
     }
 
     private land() {
         this.data.jumpFrame = 0
-        this.data.isJumping = false
+        this.data.isAirborne = false
     }
 
     // handle all internal state updates
-    // this should be called before applying move force
+    // NOTE: this should be called before applying move force
     updateData() {
 
         if (this.data.shootCooldown > 0) {
@@ -85,7 +85,7 @@ export class Player extends Model {
 
         // handle jump
         if (this.data.jumpFrame !== 0) {
-            // max jump height
+            // stop going up if at max height
             const maxHeight =
                 (this.getShape().size.height * BLOCK_SIZE_PX) /
                 PLAYER_MOVE_SPEED
@@ -93,15 +93,14 @@ export class Player extends Model {
                 this.data.jumpFrame = 0
                 return
             }
-            this.removeMoveIntent(Direction.DOWN) // suck it, gravity
+            this.removeMoveIntent(Direction.DOWN)
             this.addMoveIntent(Direction.UP)
             this.data.jumpFrame++
         }
 
-        // die
+        // Death
         console.log(this.data.health)
         if (this.data.health < 1) {
-            console.log('die')
             this.modifyState(ModelState.DESTROYED)
         }
     }

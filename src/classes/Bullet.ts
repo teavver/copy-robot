@@ -3,7 +3,7 @@ import { Position } from "../types/Position";
 import { Model, ModelState, ModelType } from "./Model";
 import { CollisionScope } from "../types/Collision";
 import ENV from "../environment";
-import { Player } from "./Player";
+import { Character } from "./Character";
 
 export interface BulletData {
     owner: string              // Bullet collision is off for owner
@@ -30,7 +30,7 @@ export class Bullet extends Model {
 
                 onDirectCollision(self, targetModel) {
                     self.modifyState(ModelState.DESTROYED)
-                    if (targetModel instanceof Player) {
+                    if (targetModel instanceof Character) {
                         const newHealth = targetModel.data.health - 20
                         console.log('bullet hit: ', targetModel.name, 'new health: ', newHealth)
                         targetModel.changeHealth(newHealth)
