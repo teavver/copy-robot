@@ -32,7 +32,7 @@ export class Bullet extends Model {
                     self.modifyState(ModelState.DESTROYED)
                     if (targetModel instanceof Character) {
                         const newHealth = targetModel.data.health - 20
-                        console.log('bullet hit: ', targetModel.name, 'new health: ', newHealth)
+                        // console.log('bullet hit: ', targetModel.name, 'new health: ', newHealth)
                         targetModel.changeHealth(newHealth)
                     }
                 },

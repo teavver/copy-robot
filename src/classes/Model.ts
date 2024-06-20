@@ -1,9 +1,6 @@
-import {
-    COLLISION_DETECTION_FIELD_SIZE_PX,
-    PLAYER_MOVE_SPEED,
-} from "../game/globals"
+import { CONSTANTS } from "../game/constants"
 import { ModelCollisionScope, CollisionScope, CollisionRectType } from "../types/Collision"
-import { blockRectToCanvas } from "../game/utils"
+import { blockRectToCanvas, blocksToPixels } from "../game/utils"
 import { Direction } from "../types/Direction"
 import { Position } from "../types/Position"
 import { ModelPositionData } from "./Layer"
@@ -84,12 +81,12 @@ export class Model extends Object {
         }
         const data: ModelPositionData = {
             pos: {
-                x: this.pos.x - COLLISION_DETECTION_FIELD_SIZE_PX / 2,
-                y: this.pos.y - COLLISION_DETECTION_FIELD_SIZE_PX / 2,
+                x: this.pos.x - blocksToPixels(CONSTANTS.COLLISION_DETECTION_FIELD_BL) / 2,
+                y: this.pos.y - blocksToPixels(CONSTANTS.COLLISION_DETECTION_FIELD_BL) / 2,
             },
             size: {
-                width: modelSizePx.width + COLLISION_DETECTION_FIELD_SIZE_PX,
-                height: modelSizePx.height + COLLISION_DETECTION_FIELD_SIZE_PX,
+                width: modelSizePx.width + blocksToPixels(CONSTANTS.COLLISION_DETECTION_FIELD_BL),
+                height: modelSizePx.height + blocksToPixels(CONSTANTS.COLLISION_DETECTION_FIELD_BL),
             },
         }
         return data
@@ -138,7 +135,7 @@ export class Model extends Object {
     }
 
     // force = px per tick/frame
-    applyMoveIntentForce(force: number = PLAYER_MOVE_SPEED) {
+    applyMoveIntentForce(force: number = CONSTANTS.PLAYER_MOVE_SPEED) {
         this.moveIntent.forEach((dir: Direction) => {
             switch (dir) {
                 case Direction.UP:

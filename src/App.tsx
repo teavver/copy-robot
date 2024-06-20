@@ -1,5 +1,5 @@
-import { GLOBALS, TARGET_FPS } from "./game/globals"
 import { ModelType } from "./classes/Model"
+import { CONSTANTS } from "./game/constants"
 import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"
 import { Status } from "./types/Status"
@@ -40,9 +40,9 @@ function App() {
         <div className="flex flex-col gap-3 w-screen h-screen justify-center items-center bg-black text-gray-500">
             <GameCanvas
                 ref={gc}
-                width={GLOBALS.CANVAS.WIDTH}
-                height={GLOBALS.CANVAS.HEIGHT}
-                framerate={TARGET_FPS}
+                width={CONSTANTS.CANVAS.WIDTH}
+                height={CONSTANTS.CANVAS.HEIGHT}
+                framerate={CONSTANTS.TARGET_FPS}
             />
 
             {ready !== "ready" ? (

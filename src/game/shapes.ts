@@ -1,12 +1,12 @@
 import { ObjectShape } from "../classes/Object"
-import { MAP_WIDTH, MAP_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "./globals"
+import { CONSTANTS } from "./constants"
 
 // shapes for models.ts
 
 // ======== BOSS CAGE ========
 const bossCageFloorShape: ObjectShape = {
     size: {
-        width: MAP_WIDTH,
+        width: CONSTANTS.MAP_WIDTH_BL,
         height: 2,
     },
     texture: "Grey",
@@ -14,15 +14,15 @@ const bossCageFloorShape: ObjectShape = {
 const bossCageWallShape: ObjectShape = {
     size: {
         width: 2,
-        height: MAP_HEIGHT,
+        height: CONSTANTS.MAP_HEIGHT_BL,
     },
     texture: "Grey",
 }
 
 const playerModelShape: ObjectShape = {
     size: {
-        width: PLAYER_WIDTH,
-        height: PLAYER_HEIGHT,
+        width: CONSTANTS.PLAYER_WIDTH_BL,
+        height: CONSTANTS.PLAYER_HEIGHT_BL,
     },
     texture: "DimGrey",
 }

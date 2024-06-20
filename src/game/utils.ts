@@ -1,29 +1,29 @@
-import { BLOCK_SIZE_PX } from "./globals"
+import { CONSTANTS } from "./constants"
 import { Size } from "../types/Size"
 import { ModelPositionData } from "../classes/Layer"
 import { Direction } from "../types/Direction"
 
 // simple value converters
-export const blocksToCanvas = (blocks: number) => {
-    return blocks * BLOCK_SIZE_PX
+export const blocksToPixels = (blocks: number) => {
+    return blocks * CONSTANTS.BLOCK_SIZE_PX
 }
 export const pxToBlocks = (px: number) => {
-    return Math.round(px / BLOCK_SIZE_PX)
+    return Math.round(px / CONSTANTS.BLOCK_SIZE_PX)
 }
 
 // conv size in blocks {2x2} to canvas px dimensions {32x32px}
 export const blockRectToCanvas = (shapeSize: Size): Size => {
     return {
-        width: shapeSize.width * BLOCK_SIZE_PX,
-        height: shapeSize.height * BLOCK_SIZE_PX,
+        width: shapeSize.width * CONSTANTS.BLOCK_SIZE_PX,
+        height: shapeSize.height * CONSTANTS.BLOCK_SIZE_PX,
     }
 }
 
 // same but backwards
 export const pxRectToBlock = (shapeSize: Size): Size => {
     return {
-        width: Math.round(shapeSize.width / BLOCK_SIZE_PX),
-        height: Math.round(shapeSize.height / BLOCK_SIZE_PX),
+        width: Math.round(shapeSize.width / CONSTANTS.BLOCK_SIZE_PX),
+        height: Math.round(shapeSize.height / CONSTANTS.BLOCK_SIZE_PX),
     }
 }
 

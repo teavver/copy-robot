@@ -1,12 +1,12 @@
 import { Model, ModelType, ModelState } from "../classes/Model"
-import { MAP_WIDTH, MAP_HEIGHT } from "./globals"
-import { Character } from "../classes/Character"
+import { CONSTANTS } from "./constants"
+import { Character, CharacterData } from "../classes/Character"
 import {
     playerModelShape,
     bossCageWallShape,
     bossCageFloorShape
 } from "./shapes"
-import { blocksToCanvas } from "./utils"
+import { blocksToPixels } from "./utils"
 import { Direction } from "../types/Direction"
 import ENV from "../environment"
 
@@ -22,9 +22,15 @@ const playerModel = new Model(
     },
     playerModelShape,
     "Player",
-    { x: blocksToCanvas(4), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
+    { x: blocksToPixels(4), y: blocksToPixels(CONSTANTS.MAP_HEIGHT_BL) - blocksToPixels(5) },
 )
-const player = new Character(playerModel)
+
+const playerData: CharacterData = {
+    health: 100,
+    faceDir: Direction.RIGHT
+}
+
+const player = new Character(playerData, playerModel)
 
 // ======= BOSS
 const bossModel = new Model(
@@ -36,11 +42,16 @@ const bossModel = new Model(
     },
     playerModelShape,
     "Boss",
-    { x: blocksToCanvas(14), y: blocksToCanvas(MAP_HEIGHT) - blocksToCanvas(5) },
+    { x: blocksToPixels(14), y: blocksToPixels(CONSTANTS.MAP_HEIGHT_BL) - blocksToPixels(5) },
 )
 
+const bossData: CharacterData = {
+    health: 300,
+    faceDir: Direction.LEFT
+}
+
 // TODO: Implement 'BOss' class later
-const boss = new Character(bossModel)
+const boss = new Character(bossData, bossModel)
 
 // ======== BOSS CAGE
 const bossCageWidth = 2 //blocks
@@ -60,13 +71,13 @@ const bossCageRightWall = new Model(
     bossCageBase,
     bossCageWallShape,
     "BossCageRightWall",
-    { x: blocksToCanvas(MAP_WIDTH - bossCageWidth), y: 0 },
+    { x: blocksToPixels(CONSTANTS.MAP_WIDTH_BL - bossCageWidth), y: 0 },
 )
 const bossCageFloor = new Model(
     bossCageBase,
     bossCageFloorShape,
     "BossCageRightWall",
-    { x: 0, y: blocksToCanvas(MAP_HEIGHT - bossCageWidth) },
+    { x: 0, y: blocksToPixels(CONSTANTS.MAP_HEIGHT_BL - bossCageWidth) },
 )
 const bossCageCeiling = new Model(
     bossCageBase,

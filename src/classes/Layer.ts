@@ -1,12 +1,12 @@
 import { Model, ModelState, ModelType } from "./Model"
 import { CollisionRectType, CollisionScope } from "../types/Collision"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
+import { CONSTANTS } from "../game/constants"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
 import { Character } from "./Character"
-import { PLAYER_MOVE_SPEED, PROJECTILE_MOVE_SPEED } from "../game/globals"
 import { logger } from "../game/logger"
 import { Bullet } from "./Bullet"
 
@@ -328,8 +328,8 @@ export class Layer {
 
             // TODO: After Projectile class, (if needed), implement custom projectile speed
             const moveForce = (model.type === ModelType.PROJECTILE)
-                ? PROJECTILE_MOVE_SPEED
-                : PLAYER_MOVE_SPEED
+                ? CONSTANTS.PROJECTILE_MOVE_SPEED
+                : CONSTANTS.PLAYER_MOVE_SPEED
             model.applyMoveIntentForce(moveForce)
             model.resetMoveIntent()
             model.resetCollisionMap()

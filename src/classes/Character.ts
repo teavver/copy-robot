@@ -1,20 +1,25 @@
-import { BLOCK_SIZE_PX, PLAYER_MOVE_SPEED } from "../game/globals"
 import { Direction } from "../types/Direction"
+import { CONSTANTS } from "../game/constants"
 import { Model, ModelState } from "./Model"
 
-interface CharacterData {
-    health: number
-    faceDir: Direction
+interface CharacterInternalData extends CharacterData {
     isShooting: boolean
     shootCooldown: number
     isAirborne: boolean
     jumpFrame: number   // jump height blocker
 }
 
-export class Character extends Model {
-    public data: CharacterData
+export interface CharacterData {
+    health: number
+    faceDir: Direction // Direction of looking at spawn time
+}
 
-    constructor(charModel: Model) {
+// Character is an extension of Model with basic non-diagonal moveset logic
+// some data, and the ability to shoot projectiles
+export class Character extends Model {
+    public data: CharacterInternalData
+
+    constructor(data: CharacterData, charModel: Model) {
         super(
             {
                 type: charModel.type,
@@ -29,12 +34,12 @@ export class Character extends Model {
         )
 
         this.data = {
-            health: 100,
+            health: data.health,
+            faceDir: data.faceDir,
             jumpFrame: 0,
             isAirborne: false,
             isShooting: false,
             shootCooldown: 0,
-            faceDir: Direction.RIGHT
         }
     }
 
@@ -87,8 +92,8 @@ export class Character extends Model {
         if (this.data.jumpFrame !== 0) {
             // stop going up if at max height
             const maxHeight =
-                (this.getShape().size.height * BLOCK_SIZE_PX) /
-                PLAYER_MOVE_SPEED
+                (this.getShape().size.height * CONSTANTS.BLOCK_SIZE_PX) /
+                CONSTANTS.PLAYER_MOVE_SPEED
             if (this.data.jumpFrame >= maxHeight) {
                 this.data.jumpFrame = 0
                 return
@@ -99,7 +104,6 @@ export class Character extends Model {
         }
 
         // Death
-        console.log(this.data.health)
         if (this.data.health < 1) {
             this.modifyState(ModelState.DESTROYED)
         }

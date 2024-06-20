@@ -1,9 +1,9 @@
-import { SECOND_IN_MS, GLOBALS, PLAYER_HEIGHT, PLAYER_WIDTH, TARGET_FPS } from "../game/globals"
+import { CONSTANTS } from "../game/constants"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
-import { blocksToCanvas } from "../game/utils"
+import { blocksToPixels } from "../game/utils"
 import { Bullet } from "./Bullet"
 import { logger } from "../game/logger"
 import { ModelType } from "./Model"
@@ -33,10 +33,10 @@ export class CanvasController {
     private isRunning: boolean = false
 
     // s2nd platform for testing gravity & collisions
-    constructor(canvas: HTMLCanvasElement | null, targetFps: number = TARGET_FPS) {
+    constructor(canvas: HTMLCanvasElement | null, targetFps: number = CONSTANTS.TARGET_FPS) {
         this.baseCanvas = canvas
-        this.frameDuration = SECOND_IN_MS / targetFps
-        this.fpsInterval = SECOND_IN_MS
+        this.frameDuration = CONSTANTS.SECOND_IN_MS / targetFps
+        this.fpsInterval = CONSTANTS.SECOND_IN_MS
 
         if (this.baseCanvas) {
             // Init base context
@@ -44,13 +44,13 @@ export class CanvasController {
             if (!this.baseContext)
                 throw new Error("Base context is not initialized")
             // Init layetrs
-            this.layers[GLOBALS.LAYERS.BACKGROUND] = new Layer(
+            this.layers[CONSTANTS.LAYERS.BACKGROUND] = new Layer(
                 this.createLayerContext(),
-                GLOBALS.LAYERS.BACKGROUND,
+                CONSTANTS.LAYERS.BACKGROUND,
             )
-            this.layers[GLOBALS.LAYERS.FOREGROUND] = new Layer(
+            this.layers[CONSTANTS.LAYERS.FOREGROUND] = new Layer(
                 this.createLayerContext(),
-                GLOBALS.LAYERS.FOREGROUND,
+                CONSTANTS.LAYERS.FOREGROUND,
             )
             logger("[CC] init OK")
         }
@@ -95,16 +95,16 @@ export class CanvasController {
         Object.values(this.layers).forEach((layer: Layer) => layer.updateActiveModels())
 
         // fg
-        this.layers[GLOBALS.LAYERS.FOREGROUND].simulatePhysics()
+        this.layers[CONSTANTS.LAYERS.FOREGROUND].simulatePhysics()
 
         // PLAYER SHOOT DEMO
         if (player.data.isShooting) {
             const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
-                ? player.pos.x - blocksToCanvas(PLAYER_WIDTH)
-                : player.pos.x + blocksToCanvas(PLAYER_WIDTH)
+                ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
+                : player.pos.x + blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
             const playerBulletPos = {
                 x: bulletStartPosX,
-                y: player.pos.y + blocksToCanvas(PLAYER_HEIGHT / 2),
+                y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
             }
 
             const bulletModel = new Bullet({
@@ -114,11 +114,11 @@ export class CanvasController {
                 gravityDirection: player.data.faceDir,
             })
 
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
+            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
             player.data.isShooting = false
         }
 
-        this.layers[GLOBALS.LAYERS.FOREGROUND].drawActiveModels()
+        this.layers[CONSTANTS.LAYERS.FOREGROUND].drawActiveModels()
         this.compositeLayers()
     }
 
@@ -138,7 +138,7 @@ export class CanvasController {
         this.frameCount++
         const elapsed = timestamp - this.lastFpsUpdateTime
         if (elapsed >= this.fpsInterval) {
-            this.fps = (this.frameCount / elapsed) * SECOND_IN_MS
+            this.fps = (this.frameCount / elapsed) * CONSTANTS.SECOND_IN_MS
             this.frameCount = 0
             this.lastFpsUpdateTime = timestamp
         }
@@ -172,7 +172,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
-            this.layers[GLOBALS.LAYERS.FOREGROUND].addActiveModels(initFgModels)
+            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels(initFgModels)
         }
     }
 
@@ -187,6 +187,6 @@ export class CanvasController {
         this.fps = 0
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
-        this.layers[GLOBALS.LAYERS.FOREGROUND].removeActiveModels(initFgModels)
+        this.layers[CONSTANTS.LAYERS.FOREGROUND].removeActiveModels(initFgModels)
     }
 }
