@@ -10,6 +10,7 @@ class Constants {
     static readonly MAP_WIDTH_BL = 48
     static readonly MAP_HEIGHT_BL = 24
     static readonly COLLISION_DETECTION_FIELD_BL = 1
+    static readonly PROJECTILE_SIZE_BL = 1
     static readonly PLAYER_WIDTH_BL = 2
     static readonly PLAYER_HEIGHT_BL = 3
 

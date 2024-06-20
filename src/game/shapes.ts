@@ -1,4 +1,4 @@
-import { ObjectShape } from "../classes/Object"
+import { ObjectShape } from "../classes/base/Object"
 import { CONSTANTS } from "./constants"
 
 // shapes for models.ts

@@ -4,9 +4,10 @@ import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 import { blocksToPixels } from "../game/utils"
-import { Bullet } from "./Bullet"
+import { Projectile } from "./base/Projectile"
 import { logger } from "../game/logger"
-import { ModelType } from "./Model"
+import { Model, ModelState, ModelType } from "./base/Model"
+import { Character } from "./base/Character"
 
 // Spawn these models at the beginning of a run
 const initFgModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player, boss]
@@ -107,11 +108,19 @@ export class CanvasController {
                 y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
             }
 
-            const bulletModel = new Bullet({
+            const bulletModel = new Projectile({
                 owner: player.name,
                 startingPos: playerBulletPos,
                 targetModelType: ModelType.ENEMY,
                 gravityDirection: player.data.faceDir,
+
+                onDirectCollision(self: Model, targetModel: Model) {
+                    self.modifyState(ModelState.DESTROYED)
+                    if (targetModel instanceof Character) {
+                        const newHealth = targetModel.data.health - 20
+                        targetModel.changeHealth(newHealth)
+                    }
+                },
             })
 
             this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])

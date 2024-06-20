@@ -1,4 +1,4 @@
-import { ModelType } from "../classes/Model"
+import { ModelType } from "../classes/base/Model"
 
 export interface ActiveModelInfo {
     name: string

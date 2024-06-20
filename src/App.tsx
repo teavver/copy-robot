@@ -1,4 +1,4 @@
-import { ModelType } from "./classes/Model"
+import { ModelType } from "./classes/base/Model"
 import { CONSTANTS } from "./game/constants"
 import { useEffect, useRef, useState } from "react"
 import { GameCanvasHandle } from "./types/GameCanvas"

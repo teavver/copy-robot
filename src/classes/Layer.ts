@@ -1,4 +1,4 @@
-import { Model, ModelState, ModelType } from "./Model"
+import { Model, ModelState, ModelType } from "./base/Model"
 import { CollisionRectType, CollisionScope } from "../types/Collision"
 import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
 import { CONSTANTS } from "../game/constants"
@@ -6,9 +6,9 @@ import { Position } from "../types/Position"
 import { Size } from "../types/Size"
 import { LayerPerformanceStats } from "../types/Performance"
 import { Direction } from "../types/Direction"
-import { Character } from "./Character"
+import { Character } from "./base/Character"
 import { logger } from "../game/logger"
-import { Bullet } from "./Bullet"
+import { Projectile } from "./base/Projectile"
 
 enum CollisionContactType {
     NONE, // far away, not even in detection range
@@ -24,7 +24,7 @@ export interface ModelPositionData {
 type ModelMap = {
     [ModelType.ENEMY]: Character
     [ModelType.PLAYER]: Character
-    [ModelType.PROJECTILE]: Bullet
+    [ModelType.PROJECTILE]: Projectile
     [ModelType.TERRAIN]: Model
 }
 
@@ -41,7 +41,7 @@ export class Layer {
     // List of active (visible) models that this layer is responsible for rendering
     private activeEnemyModels: Character[] = []
     private activePlayerModels: Character[] = []
-    private activeProjectileModels: Bullet[] = []
+    private activeProjectileModels: Projectile[] = []
     private activeTerrainModels: Model[] = []
 
     // Keep this array in-memory for faster access. Requires an update on each frame
@@ -98,7 +98,7 @@ export class Layer {
     private destroyActiveModel(model: Model) {
         model.modifyState(ModelState.DESTROYED)
         this.removeModel(model)
-        if (model.onDestroy) model.onDestroy()
+        if (model.onDestroy) model.onDestroy(model)
     }
 
     // detect & return list of models in detection range from baseModel

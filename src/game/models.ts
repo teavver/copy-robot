@@ -1,6 +1,6 @@
-import { Model, ModelType, ModelState } from "../classes/Model"
+import { Model, ModelType, ModelState } from "../classes/base/Model"
 import { CONSTANTS } from "./constants"
-import { Character, CharacterData } from "../classes/Character"
+import { Character, CharacterData } from "../classes/base/Character"
 import {
     playerModelShape,
     bossCageWallShape,
@@ -27,7 +27,9 @@ const playerModel = new Model(
 
 const playerData: CharacterData = {
     health: 100,
-    faceDir: Direction.RIGHT
+    faceDir: Direction.RIGHT,
+
+    onDirectCollision(self, tM) { }
 }
 
 const player = new Character(playerData, playerModel)
@@ -76,13 +78,13 @@ const bossCageRightWall = new Model(
 const bossCageFloor = new Model(
     bossCageBase,
     bossCageFloorShape,
-    "BossCageRightWall",
+    "BossCageFloor",
     { x: 0, y: blocksToPixels(CONSTANTS.MAP_HEIGHT_BL - bossCageWidth) },
 )
 const bossCageCeiling = new Model(
     bossCageBase,
     bossCageFloorShape,
-    "BossCageRightWall",
+    "BossCageCeiling",
     { x: 0, y: 0 },
 )
 

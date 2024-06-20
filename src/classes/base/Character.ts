@@ -1,6 +1,6 @@
-import { Direction } from "../types/Direction"
-import { CONSTANTS } from "../game/constants"
-import { Model, ModelState } from "./Model"
+import { Direction } from "../../types/Direction"
+import { CONSTANTS } from "../../game/constants"
+import { Model, ModelCallbacks, ModelState } from "./Model"
 
 interface CharacterInternalData extends CharacterData {
     isShooting: boolean
@@ -9,7 +9,7 @@ interface CharacterInternalData extends CharacterData {
     jumpFrame: number   // jump height blocker
 }
 
-export interface CharacterData {
+export interface CharacterData extends ModelCallbacks {
     health: number
     faceDir: Direction // Direction of looking at spawn time
 }
@@ -26,7 +26,9 @@ export class Character extends Model {
                 state: charModel.state,
                 gravityDirection: charModel.gravityDirection,
                 displayCollision: charModel.displayCollision,
-                collisionScope: charModel.getCollisionScope()
+                collisionScope: charModel.getCollisionScope(),
+                onDirectCollision: data.onDirectCollision,
+                onDestroy: data.onDestroy,
             },
             charModel.getShape(),
             charModel.name,

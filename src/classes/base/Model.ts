@@ -1,11 +1,11 @@
-import { CONSTANTS } from "../game/constants"
-import { ModelCollisionScope, CollisionScope, CollisionRectType } from "../types/Collision"
-import { blockRectToCanvas, blocksToPixels } from "../game/utils"
-import { Direction } from "../types/Direction"
-import { Position } from "../types/Position"
-import { ModelPositionData } from "./Layer"
+import { CONSTANTS } from "../../game/constants"
+import { ModelCollisionScope, CollisionScope, CollisionRectType } from "../../types/Collision"
+import { blockRectToCanvas, blocksToPixels } from "../../game/utils"
+import { Direction } from "../../types/Direction"
+import { Position } from "../../types/Position"
+import { ModelPositionData } from "../Layer"
 import { Object, ObjectShape } from "./Object"
-import ENV from "../environment"
+import ENV from "../../environment"
 
 // Model is an extension of a `Shape`
 // contains non-abstract logic and can be drawn and manipulated from a Layer.
@@ -33,8 +33,10 @@ export interface ModelData {
 
     // Custom per-model callbacks on specific events during game loop
     onDirectCollision?: (self: Model, targetModel: Model) => void
-    onDestroy?: () => void
+    onDestroy?: (self: Model) => void
 }
+
+export interface ModelCallbacks extends Pick<ModelData, 'onDirectCollision' | 'onDestroy'> { }
 
 export class Model extends Object {
     name: string // used for texture resolution
@@ -50,7 +52,7 @@ export class Model extends Object {
     // moveIntent holds a set of direction instructions, which are later evaluated by `simulatePhysics`
     private moveIntent: Set<Direction>
     onDirectCollision: ((s: Model, tM: Model) => void) | undefined
-    onDestroy: (() => void) | undefined
+    onDestroy: ((s: Model) => void) | undefined
 
     constructor(
         data: ModelData,

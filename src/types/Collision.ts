@@ -1,4 +1,4 @@
-import { ModelType } from "../classes/Model";
+import { ModelType } from "../classes/base/Model";
 
 export enum CollisionScope {
     NONE, // Model with disabled collision
