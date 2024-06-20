@@ -62,7 +62,9 @@ export class Layer {
     }
 
     private isModelActive(model: Model) {
-        return this.getActiveModelsByType(model.type).includes(model)
+        const r = this.getActiveModelsByType(model.type).includes(model)
+        if (!r) logger(`(GC) Model marked as inactive: ${model.name}`)
+        return r
     }
 
     // Get all activeModels of one specific ModelType
@@ -71,20 +73,25 @@ export class Layer {
     }
 
     // (GC check) Destroy all objects that are outside the canvas view
-    private isModelOutOfBounds(mPosData: ModelPositionData): boolean {
+    private isModelOutOfBounds(mPosData: ModelPositionData, mName: string): boolean {
         const { width, height } = this.context.canvas
         const canvasPosData: ModelPositionData = {
             pos: { x: 0, y: 0 },
             size: { width, height },
         }
         const [inBounds] = areRectsIntersecting(mPosData, canvasPosData)
-        if (!inBounds) return true
+        if (!inBounds) {
+            logger(`(GC) Model out of bounds: ${mName}`)
+            return true
+        }
         return false
     }
 
     // (GC check) Check if ModelState is "DESTROYED" - if yes, remove it from the render loop
     private isModelDestroyed(model: Model) {
-        return model.state === ModelState.DESTROYED
+        const r = model.state === ModelState.DESTROYED
+        if (r) logger(`(GC) Model marked as destroyed: ${model.name}`)
+        return r
     }
 
     // (GC) Remove model from its model type active models array
@@ -283,7 +290,7 @@ export class Layer {
         if (
             !this.isModelActive(model) ||
             this.isModelDestroyed(model) ||
-            this.isModelOutOfBounds(mPosData)
+            this.isModelOutOfBounds(mPosData, model.name)
         ) {
             this.destroyActiveModel(model)
             return true
