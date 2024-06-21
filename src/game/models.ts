@@ -52,7 +52,6 @@ const bossData: CharacterData = {
     faceDir: Direction.LEFT
 }
 
-// TODO: Implement 'BOss' class later
 const boss = new Character(bossData, bossModel)
 
 // ======== BOSS CAGE

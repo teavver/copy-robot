@@ -47,7 +47,7 @@ export class Character extends Model {
 
     shoot() {
         if (this.data.shootCooldown > 0) return
-        this.data.shootCooldown += 20
+        this.data.shootCooldown += CONSTANTS.SHOOT_COOLDOWN
         this.data.isShooting = true
     }
 
@@ -62,8 +62,8 @@ export class Character extends Model {
         }
     }
 
-    changeHealth(newVal: number) {
-        this.data.health = newVal
+    applyDamage(val: number = CONSTANTS.HIT_DAMAGE) {
+        this.data.health -= val
     }
 
     private jump() {

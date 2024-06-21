@@ -117,8 +117,7 @@ export class CanvasController {
                 onDirectCollision(self: Model, targetModel: Model) {
                     self.modifyState(ModelState.DESTROYED)
                     if (targetModel instanceof Character) {
-                        const newHealth = targetModel.data.health - 20
-                        targetModel.changeHealth(newHealth)
+                        targetModel.applyDamage(CONSTANTS.HIT_DAMAGE)
                     }
                 },
             })
