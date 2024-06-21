@@ -36,7 +36,7 @@ export class Projectile extends Model {
                     width: CONSTANTS.PROJECTILE_SIZE_BL,
                     height: CONSTANTS.PROJECTILE_SIZE_BL,
                 },
-                texture: "White"
+                txtData: { type: "Color", color: "White" }
             },
             `Projectile (${data.owner})`,
             data.startingPos

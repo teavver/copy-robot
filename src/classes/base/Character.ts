@@ -17,7 +17,7 @@ export interface CharacterData extends ModelCallbacks {
 // Character is an extension of Model with basic non-diagonal moveset logic
 // some data, and the ability to shoot projectiles
 export class Character extends Model {
-    public data: CharacterInternalData
+    data: CharacterInternalData
 
     constructor(data: CharacterData, charModel: Model) {
         super(
@@ -30,7 +30,10 @@ export class Character extends Model {
                 onDirectCollision: data.onDirectCollision,
                 onDestroy: data.onDestroy,
             },
-            charModel.getShape(),
+            {
+                size: charModel.oData.size,
+                txtData: charModel.getSrcTxt(),
+            },
             charModel.name,
             charModel.pos,
         )

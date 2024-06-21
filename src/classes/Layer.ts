@@ -217,7 +217,26 @@ export class Layer {
 
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
-        this.context.fillStyle = mShape.texture
+        const txt = model.oData.txtData
+
+        if (txt.type === "Color") {
+            // Model with plain color
+            this.context.fillStyle = txt.txt
+        } else {
+            // Handle spritesheet & texture models
+            // let [dx, dy, dWidth, dHeight]: number[] = [0]
+            let [dx, dy, dWidth, dHeight] = Array(4).fill(0)
+
+            // Handle spritesheet pos
+            if (txt.type === "SpriteImg") {
+                dx = txt.spriteData.srcX
+                dy = txt.spriteData.srcY
+                dWidth = txt.spriteData.width
+                dHeight = txt.spriteData.height
+            }
+            this.context.drawImage(txt.txt as HTMLImageElement, dx, dy, dWidth, dHeight)
+        }
+
 
         this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         if (model.displayCollision) {

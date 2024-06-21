@@ -1,30 +1,30 @@
-import { ObjectShape } from "../classes/base/Object"
 import { CONSTANTS } from "./constants"
 
 // shapes for models.ts
 
 // ======== BOSS CAGE ========
-const bossCageFloorShape: ObjectShape = {
+const bossCageFloorShape = {
     size: {
         width: CONSTANTS.MAP_WIDTH_BL,
         height: 2,
     },
-    texture: "Grey",
+    txtData: { type: "Color" as "Color", color: "Grey" }
 }
-const bossCageWallShape: ObjectShape = {
+const bossCageWallShape = {
     size: {
         width: 2,
         height: CONSTANTS.MAP_HEIGHT_BL,
     },
-    texture: "Grey",
+    txtData: { type: "Color" as "Color", color: "Grey" }
 }
 
-const playerModelShape: ObjectShape = {
+const playerModelShape = {
     size: {
         width: CONSTANTS.PLAYER_WIDTH_BL,
         height: CONSTANTS.PLAYER_HEIGHT_BL,
     },
-    texture: "DimGrey",
+    // txtData: { type: "StaticImg" as "StaticImg", assetName: "Player" }
+    txtData: { type: "Color" as "Color", color: "LightGrey" }
 }
 
 export { bossCageFloorShape, bossCageWallShape, playerModelShape }

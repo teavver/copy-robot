@@ -29,7 +29,7 @@ const playerData: CharacterData = {
     health: 100,
     faceDir: Direction.RIGHT,
 
-    onDirectCollision(self, tM) { }
+    onDirectCollision() { }
 }
 
 const player = new Character(playerData, playerModel)

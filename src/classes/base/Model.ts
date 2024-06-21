@@ -4,8 +4,9 @@ import { blockRectToCanvas, blocksToPixels } from "../../game/utils"
 import { Direction } from "../../types/Direction"
 import { Position } from "../../types/Position"
 import { ModelPositionData } from "../Layer"
-import { Object, ObjectShape } from "./Object"
+import { Object, ObjectShapeArgs } from "./Object"
 import ENV from "../../environment"
+import { TextureType } from "../../types/Texture"
 
 // Model is an extension of a `Shape`
 // contains non-abstract logic and can be drawn and manipulated from a Layer.
@@ -56,7 +57,7 @@ export class Model extends Object {
 
     constructor(
         data: ModelData,
-        shape: ObjectShape,
+        shape: ObjectShapeArgs<TextureType>,
         name: string,
         initialPos: Position,
     ) {
