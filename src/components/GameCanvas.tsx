@@ -1,8 +1,10 @@
 import { useRef, useEffect, useImperativeHandle, forwardRef } from "react"
 import { CanvasController } from "../classes/CanvasController"
+import { AssetManager } from "../classes/AssetManager"
 import { GameCanvasHandle, GameCanvasProps } from "../types/GameCanvas"
 import { Direction } from "../types/Direction"
 import { logger } from "../game/logger"
+import { GAME_MODELS } from "../game/models"
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     ({ width, height, framerate }, ref) => {
@@ -19,6 +21,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
             if (canvasRef.current) {
                 controllerRef.current = new CanvasController(
                     canvasRef.current,
+                    GAME_MODELS,
                     framerate,
                 )
                 logger("[game canvas] init ctx")

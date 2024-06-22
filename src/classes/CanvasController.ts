@@ -2,17 +2,15 @@ import { CONSTANTS } from "../game/constants"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
-import { player, boss, bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall } from "../game/models"
 import { blocksToPixels } from "../game/utils"
 import { Projectile } from "./base/Projectile"
 import { logger } from "../game/logger"
 import { Model, ModelState, ModelType } from "./base/Model"
 import { Character } from "./base/Character"
-
-// Spawn these models at the beginning of a run
-const initFgModels = [bossCageCeiling, bossCageFloor, bossCageLeftWall, bossCageRightWall, player, boss]
+import { GameModels } from "../game/models"
 
 export class CanvasController {
+
     // ctx, layers
     private baseCanvas: HTMLCanvasElement | null = null
 
@@ -20,6 +18,9 @@ export class CanvasController {
     // is used to render the final composited image that combines layers
     private baseContext: CanvasRenderingContext2D | null = null
     private layers: { [key: string]: Layer } = {}
+
+    // base models
+    private baseModels: GameModels = {}
 
     // framerate, render loop, fps stats
     private frameDuration: number
@@ -34,16 +35,19 @@ export class CanvasController {
     private isRunning: boolean = false
 
     // s2nd platform for testing gravity & collisions
-    constructor(canvas: HTMLCanvasElement | null, targetFps: number = CONSTANTS.TARGET_FPS) {
+    constructor(canvas: HTMLCanvasElement | null, baseModels: GameModels, targetFps: number = CONSTANTS.TARGET_FPS) {
+
         this.baseCanvas = canvas
         this.frameDuration = CONSTANTS.SECOND_IN_MS / targetFps
         this.fpsInterval = CONSTANTS.SECOND_IN_MS
 
         if (this.baseCanvas) {
+
             // Init base context
             this.baseContext = this.baseCanvas.getContext("2d")
             if (!this.baseContext)
-                throw new Error("Base context is not initialized")
+                throw new Error("(CC) Base context is not initialized")
+
             // Init layetrs
             this.layers[CONSTANTS.LAYERS.BACKGROUND] = new Layer(
                 this.createLayerContext(),
@@ -53,7 +57,11 @@ export class CanvasController {
                 this.createLayerContext(),
                 CONSTANTS.LAYERS.FOREGROUND,
             )
-            logger("[CC] init OK")
+
+            // Init models
+            this.baseModels = baseModels
+
+            logger("(CC) init OK")
         }
     }
 
@@ -99,6 +107,7 @@ export class CanvasController {
         this.layers[CONSTANTS.LAYERS.FOREGROUND].simulatePhysics()
 
         // PLAYER SHOOT DEMO
+        const player = this.baseModels["Player"] as Character
         if (player.data.isShooting) {
             const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
                 ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
@@ -155,11 +164,11 @@ export class CanvasController {
 
     //// user
     playerMove(dir: Direction) {
-        player.move(dir)
+        (this.baseModels["Player"] as Character).move(dir)
     }
 
     playerShoot() {
-        player.shoot()
+        (this.baseModels["Player"] as Character).shoot()
     }
 
     ///// performance logging
@@ -180,7 +189,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
-            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels(initFgModels)
+            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels(Object.values(this.baseModels))
         }
     }
 
@@ -195,6 +204,6 @@ export class CanvasController {
         this.fps = 0
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
-        this.layers[CONSTANTS.LAYERS.FOREGROUND].removeActiveModels(initFgModels)
+        this.layers[CONSTANTS.LAYERS.FOREGROUND].removeActiveModels(Object.values(this.baseModels))
     }
 }

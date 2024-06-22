@@ -36,7 +36,6 @@ export class Object {
     }
 
     private resolveSourceTexture(src: UnresolvedTextureData<TextureType>): ResolvedTextureData<TextureType> {
-        const asset = new Image()
         switch (src.type) {
             case "Color":
                 return {
@@ -44,11 +43,7 @@ export class Object {
                     txt: src.color
                 }
             case "StaticImg":
-                asset.src = src.assetName
-                return { ...src, txt: asset }
             case "SpriteImg":
-                asset.src = src.assetName
-                return { ...src, txt: asset, spriteData: src.spriteData }
             default:
                 // Return Pink fallback texture (Missing or Corrupted)
                 logger(`(Object): Failed to resolve src txt. Using fallback`, 0)

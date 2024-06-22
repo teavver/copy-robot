@@ -10,7 +10,6 @@ function App() {
     const gc = useRef<GameCanvasHandle>(null)
     const [ready, setReady] = useState<Status>("loading")
 
-
     // Performance debugging/logging
     const [debugMode, setDebugMode] = useState<boolean>(true)
     const [layerPerfStats, setLayerPerfStats] = useState<LayerPerformanceStats[]>([])
