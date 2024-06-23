@@ -4,8 +4,8 @@ import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { logger } from "../game/logger"
 import { Model, ModelParams } from "./base/Model"
-import { GameModelParams, BaseModelParams } from "../game/data/models"
-import { Character, CharacterData } from "./base/Character"
+import { GameModelParams } from "../game/data/models"
+import { Character } from "./base/Character"
 import { assetManager } from "../components/GameCanvas"
 import { Map } from "../types/Map"
 
@@ -140,7 +140,7 @@ export class CanvasController {
         this.layers[CONSTANTS.LAYERS.FOREGROUND].simulatePhysics()
 
         // // PLAYER SHOOT DEMO (WIP)
-        const player = this.models["Player"] as Character
+        // const player = this.models["Player"] as Character
         // if (player.data.isShooting) {
         //     const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
         //         ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)

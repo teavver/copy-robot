@@ -1,3 +1,4 @@
+import { logger } from "../game/logger"
 import { Status } from "../types/Status"
 import { ResolvedObjectTexture, UnresolvedObjectTexture } from "../types/Texture"
 
@@ -10,7 +11,7 @@ export class AssetManager {
     private fallbackTexture: ResolvedObjectTexture = {
         type: "Color",
         name: "FALLBACK_TEXTURE",
-        txt: "Pink"
+        txt: "Lime"
     }
 
     constructor(gameTextures: UnresolvedObjectTexture[]) {
@@ -19,39 +20,30 @@ export class AssetManager {
     }
 
     private loadTextures(textures: UnresolvedObjectTexture[]): ResolvedObjectTexture[] {
-        console.log("(AM) loading textures...")
+        logger("(AM) loading textures...")
         const resolved: ResolvedObjectTexture[] = []
-        textures.forEach(txt => {
-            if (txt.type === "Color") {
-                resolved.push({ ...txt, txt: txt.color })
+        textures.forEach(uTxt => {
+            if (uTxt.type === "Color") {
+                resolved.push({ ...uTxt, txt: uTxt.color })
             } else {
+                // TODO: Remove "Sprite" in Texture.ts and add function to cut a Sprite out of Image
                 const img = new Image()
-                img.src = txt.src
-                // document.body.appendChild(img);
-
-                if (txt.type === "Sprite") {
-                    resolved.push({
-                        ...txt,
-                        txt: img,
-                    })
-                } else {
-                    resolved.push({
-                        ...txt,
-                        txt: img
-                    })
-                }
+                img.src = uTxt.src
+                resolved.push({
+                    ...uTxt,
+                    txt: img,
+                })
             }
         })
 
         this.status = "ready"
-        console.log("(AM) textures loaded")
-        console.log("(AM) textures: ", resolved)
+        logger(`(AM) textures loaded: ${JSON.stringify(resolved, null, 2)}`)
         return resolved
     }
 
     getTexture(name: string): ResolvedObjectTexture {
         if (this.status !== "ready") {
-            console.error("Can't getTexture - assetManager has not finished initializing!")
+            logger("Can't getTexture - assetManager has not finished initializing!", 0)
             return this.fallbackTexture
         }
         const found = this.assets.find(asset => asset.name === name)

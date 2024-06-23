@@ -12,7 +12,6 @@ type ObjectTextureBase = {
 export type UnresolvedObjectTexture =
     | (ObjectTextureBase & { type: "Color", color: string }) // CSS colorstring
     | (ObjectTextureBase & { type: "Image", src: string })
-    | (ObjectTextureBase & { type: "Sprite", src: string, sData?: SpriteTextureData })
 
 export type ResolvedObjectTexture =
     | (ObjectTextureBase & { type: "Color", txt: string })
