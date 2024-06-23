@@ -1,10 +1,13 @@
 import { useRef, useEffect, useImperativeHandle, forwardRef } from "react"
 import { CanvasController } from "../classes/CanvasController"
 import { AssetManager } from "../classes/AssetManager"
+import { BASE_GAME_MODELS } from "../game/data/models"
 import { GameCanvasHandle, GameCanvasProps } from "../types/GameCanvas"
 import { Direction } from "../types/Direction"
 import { logger } from "../game/logger"
-import { GAME_MODELS } from "../game/models"
+import { GAME_ASSETS } from "../game/assets"
+
+export const assetManager = new AssetManager(GAME_ASSETS)
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     ({ width, height, framerate }, ref) => {
@@ -21,7 +24,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
             if (canvasRef.current) {
                 controllerRef.current = new CanvasController(
                     canvasRef.current,
-                    GAME_MODELS,
+                    BASE_GAME_MODELS,
                     framerate,
                 )
                 logger("[game canvas] init ctx")
@@ -65,7 +68,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 window.removeEventListener("keydown", handleKeyDown)
                 window.removeEventListener("keyup", handleKeyUp)
             }
-        }, [canvasRef, controllerRef, framerate])
+        }, [canvasRef, controllerRef, assetManager])
 
         return (
             <canvas

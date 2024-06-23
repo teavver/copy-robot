@@ -1,23 +1,20 @@
-export interface SpritesheetTxtData {
+export interface SpriteTextureData {
     srcX: number
     srcY: number
     width: number
     height: number
 }
 
-export type TextureType = "Color" | "StaticImg" | "SpriteImg"
+type ObjectTextureBase = {
+    name: string
+}
 
-export type UnresolvedTextureData<T extends TextureType> =
-    T extends "Color" ? { type: T, color: string } :
-    T extends "StaticImg" ? { type: T, assetName: string } :
-    T extends "SpriteImg" ? { type: T, assetName: string, spriteData: SpritesheetTxtData }
-    : never
+export type UnresolvedObjectTexture =
+    | (ObjectTextureBase & { type: "Color", color: string }) // CSS colorstring
+    | (ObjectTextureBase & { type: "Image", src: string })
+    | (ObjectTextureBase & { type: "Sprite", src: string, sData?: SpriteTextureData })
 
-export type ResolvedTextureData<T extends TextureType> =
-    T extends "Color"
-    ? { type: T, txt: string }
-    : T extends "StaticImg"
-    ? { type: T, txt: HTMLImageElement }
-    : T extends "SpriteImg"
-    ? { type: T, txt: HTMLImageElement, spriteData: SpritesheetTxtData }
-    : never;
+export type ResolvedObjectTexture =
+    | (ObjectTextureBase & { type: "Color", txt: string })
+    | (ObjectTextureBase & { type: "Image", txt: HTMLImageElement })
+    | (ObjectTextureBase & { type: "Sprite", txt: HTMLImageElement, sData?: SpriteTextureData })

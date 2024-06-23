@@ -2,12 +2,12 @@ import { CONSTANTS } from "../game/constants"
 import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
-import { blocksToPixels } from "../game/utils"
-import { Projectile } from "./base/Projectile"
 import { logger } from "../game/logger"
-import { Model, ModelState, ModelType } from "./base/Model"
-import { Character } from "./base/Character"
-import { GameModels } from "../game/models"
+import { Model, ModelParams } from "./base/Model"
+import { GameModelParams, BaseModelParams } from "../game/data/models"
+import { Character, CharacterData } from "./base/Character"
+import { assetManager } from "../components/GameCanvas"
+import { Map } from "../types/Map"
 
 export class CanvasController {
 
@@ -17,10 +17,8 @@ export class CanvasController {
     // drawing ops are done on respective layers in the main loop, the baseContext
     // is used to render the final composited image that combines layers
     private baseContext: CanvasRenderingContext2D | null = null
-    private layers: { [key: string]: Layer } = {}
-
-    // base models
-    private baseModels: GameModels = {}
+    private layers: Map<Layer> = {}
+    private models: Map<Model> = {}
 
     // framerate, render loop, fps stats
     private frameDuration: number
@@ -35,7 +33,7 @@ export class CanvasController {
     private isRunning: boolean = false
 
     // s2nd platform for testing gravity & collisions
-    constructor(canvas: HTMLCanvasElement | null, baseModels: GameModels, targetFps: number = CONSTANTS.TARGET_FPS) {
+    constructor(canvas: HTMLCanvasElement | null, baseModels: Map<GameModelParams>, targetFps: number = CONSTANTS.TARGET_FPS) {
 
         this.baseCanvas = canvas
         this.frameDuration = CONSTANTS.SECOND_IN_MS / targetFps
@@ -58,11 +56,46 @@ export class CanvasController {
                 CONSTANTS.LAYERS.FOREGROUND,
             )
 
-            // Init models
-            this.baseModels = baseModels
-
+            this.models = this.initBaseModels(baseModels)
             logger("(CC) init OK")
         }
+    }
+
+    // NOTE: This could be much better
+    private initBaseModels(bM: Map<GameModelParams>): Map<Model> {
+        const models: Map<Model> = {}
+        Object.entries(bM).forEach(([, gModel]) => {
+            try {
+                // Simple Model
+                if (gModel.cls === "Model") {
+                    const params: ModelParams = {
+                        ...gModel.params,
+                        shape: {
+                            size: gModel.params.shape.size,
+                            txt: assetManager.getTexture(gModel.params.shape.txtName)
+                        }
+                    }
+                    const m = new Model(params)
+                    models[m.name] = m
+                } else {
+                    // Character Model
+                    const mp = gModel.params[1]
+                    const mParams: ModelParams = {
+                        ...mp,
+                        shape: {
+                            size: mp.shape.size,
+                            txt: assetManager.getTexture(mp.shape.txtName)
+                        }
+                    }
+                    const c = new Character(gModel.params[0], mParams)
+                    models[c.name] = c
+                }
+            } catch (error) {
+                logger(`(CC) Init model failed: ${error as string}`, 0)
+            }
+        })
+        logger(`(CC) Base models initialized`)
+        return models
     }
 
     private createLayerContext(): CanvasRenderingContext2D {
@@ -106,34 +139,34 @@ export class CanvasController {
         // fg
         this.layers[CONSTANTS.LAYERS.FOREGROUND].simulatePhysics()
 
-        // PLAYER SHOOT DEMO
-        const player = this.baseModels["Player"] as Character
-        if (player.data.isShooting) {
-            const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
-                ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
-                : player.pos.x + blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
-            const playerBulletPos = {
-                x: bulletStartPosX,
-                y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
-            }
+        // // PLAYER SHOOT DEMO (WIP)
+        const player = this.models["Player"] as Character
+        // if (player.data.isShooting) {
+        //     const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
+        //         ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
+        //         : player.pos.x + blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
+        //     const playerBulletPos = {
+        //         x: bulletStartPosX,
+        //         y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
+        //     }
 
-            const bulletModel = new Projectile({
-                owner: player.name,
-                startingPos: playerBulletPos,
-                targetModelType: ModelType.ENEMY,
-                gravityDirection: player.data.faceDir,
+        //     const bulletModel = new Projectile({
+        //         owner: player.name,
+        //         startingPos: playerBulletPos,
+        //         targetModelType: ModelType.ENEMY,
+        //         gravityDirection: player.data.faceDir,
 
-                onDirectCollision(self: Model, targetModel: Model) {
-                    self.modifyState(ModelState.DESTROYED)
-                    if (targetModel instanceof Character) {
-                        targetModel.applyDamage(CONSTANTS.HIT_DAMAGE)
-                    }
-                },
-            })
+        //         onDirectCollision(self: Model, targetModel: Model) {
+        //             self.modifyState(ModelState.DESTROYED)
+        //             if (targetModel instanceof Character) {
+        //                 targetModel.applyDamage(CONSTANTS.HIT_DAMAGE)
+        //             }
+        //         },
+        //     })
 
-            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
-            player.data.isShooting = false
-        }
+        //     this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
+        //     player.data.isShooting = false
+        // }
 
         this.layers[CONSTANTS.LAYERS.FOREGROUND].drawActiveModels()
         this.compositeLayers()
@@ -164,11 +197,11 @@ export class CanvasController {
 
     //// user
     playerMove(dir: Direction) {
-        (this.baseModels["Player"] as Character).move(dir)
+        (this.models["Player"] as Character).move(dir)
     }
 
     playerShoot() {
-        (this.baseModels["Player"] as Character).shoot()
+        (this.models["Player"] as Character).shoot()
     }
 
     ///// performance logging
@@ -189,7 +222,7 @@ export class CanvasController {
             this.lastFpsUpdateTime = this.lastFrameTime
             this.frameCount = 0
             this.frameRequestID = requestAnimationFrame(this.drawLoop)
-            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels(Object.values(this.baseModels))
+            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels(Object.values(this.models))
         }
     }
 
@@ -204,6 +237,6 @@ export class CanvasController {
         this.fps = 0
         this.frameCount = 0
         this.lastFpsUpdateTime = 0
-        this.layers[CONSTANTS.LAYERS.FOREGROUND].removeActiveModels(Object.values(this.baseModels))
+        this.layers[CONSTANTS.LAYERS.FOREGROUND].removeActiveModels(Object.values(this.models))
     }
 }

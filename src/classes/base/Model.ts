@@ -4,9 +4,8 @@ import { blockRectToCanvas, blocksToPixels } from "../../game/utils"
 import { Direction } from "../../types/Direction"
 import { Position } from "../../types/Position"
 import { ModelPositionData } from "../Layer"
-import { Object, ObjectShapeArgs } from "./Object"
+import { Object, ObjectShape } from "./Object"
 import ENV from "../../environment"
-import { TextureType } from "../../types/Texture"
 
 // Model is an extension of a `Shape`
 // contains non-abstract logic and can be drawn and manipulated from a Layer.
@@ -37,6 +36,13 @@ export interface ModelData {
     onDestroy?: (self: Model) => void
 }
 
+export interface ModelParams {
+    data: ModelData,
+    shape: ObjectShape,
+    name: string,
+    initialPos: Position,
+}
+
 export interface ModelCallbacks extends Pick<ModelData, 'onDirectCollision' | 'onDestroy'> { }
 
 export class Model extends Object {
@@ -56,23 +62,20 @@ export class Model extends Object {
     onDestroy: ((s: Model) => void) | undefined
 
     constructor(
-        data: ModelData,
-        shape: ObjectShapeArgs<TextureType>,
-        name: string,
-        initialPos: Position,
+        params: ModelParams
     ) {
-        super(shape)
-        this.name = name
-        this.pos = initialPos
-        this.type = data.type
-        this.state = data.state
+        super(params.shape)
+        this.name = params.name
+        this.pos = params.initialPos
+        this.type = params.data.type
+        this.state = params.data.state
         this.moveIntent = new Set<Direction>()
-        this.gravityDirection = data.gravityDirection || Direction.DOWN
-        this.displayCollision = data.displayCollision || ENV.DRAW_COLLISION
+        this.gravityDirection = params.data.gravityDirection || Direction.DOWN
+        this.displayCollision = params.data.displayCollision || ENV.DRAW_COLLISION
         this.collisionMap = new Set<Direction>()
-        this.collisionScope = data.collisionScope || { scope: CollisionScope.SAME_LAYER }
-        this.onDirectCollision = data.onDirectCollision
-        this.onDestroy = data.onDestroy
+        this.collisionScope = params.data.collisionScope || { scope: CollisionScope.SAME_LAYER }
+        this.onDirectCollision = params.data.onDirectCollision
+        this.onDestroy = params.data.onDestroy
     }
 
     // pretty useful for debugging

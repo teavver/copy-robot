@@ -1,6 +1,6 @@
 import { Direction } from "../../types/Direction"
 import { CONSTANTS } from "../../game/constants"
-import { Model, ModelCallbacks, ModelState } from "./Model"
+import { Model, ModelCallbacks, ModelParams, ModelState } from "./Model"
 
 interface CharacterInternalData extends CharacterData {
     isShooting: boolean
@@ -11,7 +11,7 @@ interface CharacterInternalData extends CharacterData {
 
 export interface CharacterData extends ModelCallbacks {
     health: number
-    faceDir: Direction // Direction of looking at spawn time
+    faceDir: Direction // Direction of looking at spawn time   
 }
 
 // Character is an extension of Model with basic non-diagonal moveset logic
@@ -19,24 +19,8 @@ export interface CharacterData extends ModelCallbacks {
 export class Character extends Model {
     data: CharacterInternalData
 
-    constructor(data: CharacterData, charModel: Model) {
-        super(
-            {
-                type: charModel.type,
-                state: charModel.state,
-                gravityDirection: charModel.gravityDirection,
-                displayCollision: charModel.displayCollision,
-                collisionScope: charModel.getCollisionScope(),
-                onDirectCollision: data.onDirectCollision,
-                onDestroy: data.onDestroy,
-            },
-            {
-                size: charModel.oData.size,
-                txtData: charModel.getSrcTxt(),
-            },
-            charModel.name,
-            charModel.pos,
-        )
+    constructor(data: CharacterData, mParams: ModelParams) {
+        super(mParams)
 
         this.data = {
             health: data.health,

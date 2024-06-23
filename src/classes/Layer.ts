@@ -217,28 +217,16 @@ export class Layer {
 
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
-        const txt = model.oData.txtData
 
-        if (txt.type === "Color") {
+        if (mShape.txt.type === "Color") {
             // Model with plain color
-            this.context.fillStyle = txt.txt
+            this.context.fillStyle = mShape.txt.txt
+            this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         } else {
-            // Handle spritesheet & texture models
-            // let [dx, dy, dWidth, dHeight]: number[] = [0]
-            let [dx, dy, dWidth, dHeight] = Array(4).fill(0)
-
-            // Handle spritesheet pos
-            if (txt.type === "SpriteImg") {
-                dx = txt.spriteData.srcX
-                dy = txt.spriteData.srcY
-                dWidth = txt.spriteData.width
-                dHeight = txt.spriteData.height
-            }
-            this.context.drawImage(txt.txt as HTMLImageElement, dx, dy, dWidth, dHeight)
+            // Texture
+            this.context.drawImage(mShape.txt.txt, model.pos.x, model.pos.y)
         }
 
-
-        this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         if (model.displayCollision) {
             // draw col detection field rect
             this.context.strokeStyle = "rgba(255, 255, 200, 1)"

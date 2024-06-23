@@ -1,13 +1,17 @@
-import { RawGameAsset } from "../types/Asset"
+import { UnresolvedObjectTexture } from "../types/Texture"
 // asset files
 import Player from "./assets/Player.png"
 
 
-
-
-export const GAME_ASSETS: RawGameAsset[] = [
+export const GAME_ASSETS: UnresolvedObjectTexture[] = [
+    {
+        name: "Grey",
+        type: "Color",
+        color: "Grey"
+    },
     {
         name: "Player",
-        source: Player
+        type: "Image",
+        src: Player
     }
 ]

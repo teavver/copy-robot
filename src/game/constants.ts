@@ -22,7 +22,7 @@ class Constants {
     static readonly MAP_HEIGHT_BL = 24
     static readonly PLAYER_WIDTH_BL = 2
     static readonly PLAYER_HEIGHT_BL = 3
-    static readonly WALL_WIDTH_BL = 2
+    static readonly WALL_THICKNESS_BL = 2
 
     // Canvas
     static readonly LAYERS = {

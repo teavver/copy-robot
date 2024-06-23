@@ -1,38 +1,61 @@
 import { Status } from "../types/Status"
-import { RawGameAsset, LoadedGameAsset } from "../types/Asset"
-import { logger } from "../game/logger"
+import { ResolvedObjectTexture, UnresolvedObjectTexture } from "../types/Texture"
 
-// Load all game assets from files to memory
+// Resolves object textures
 export class AssetManager {
 
     private status: Status
-    assets: LoadedGameAsset[] = []
+    private assets: ResolvedObjectTexture[] = []
 
-    constructor(assets: RawGameAsset[]) {
-        this.status = "loading"
-        this.loadAssets(assets)
+    private fallbackTexture: ResolvedObjectTexture = {
+        type: "Color",
+        name: "FALLBACK_TEXTURE",
+        txt: "Pink"
     }
 
-    async loadAssets(rawAssets: RawGameAsset[]) {
-        console.log("Loading assets")
-        const loadedAssets: LoadedGameAsset[] = []
-        rawAssets.forEach(asset => {
-            const img = new Image()
-            img.src = asset.source
-            const rAsset: LoadedGameAsset = {
-                name: asset.name,
-                asset: img
+    constructor(gameTextures: UnresolvedObjectTexture[]) {
+        this.status = "loading"
+        this.assets = this.loadTextures(gameTextures)
+    }
+
+    private loadTextures(textures: UnresolvedObjectTexture[]): ResolvedObjectTexture[] {
+        console.log("(AM) loading textures...")
+        const resolved: ResolvedObjectTexture[] = []
+        textures.forEach(txt => {
+            if (txt.type === "Color") {
+                resolved.push({ ...txt, txt: txt.color })
+            } else {
+                const img = new Image()
+                img.src = txt.src
+                // document.body.appendChild(img);
+
+                if (txt.type === "Sprite") {
+                    resolved.push({
+                        ...txt,
+                        txt: img,
+                    })
+                } else {
+                    resolved.push({
+                        ...txt,
+                        txt: img
+                    })
+                }
             }
-            loadedAssets.push(rAsset)
         })
 
-        this.assets = loadedAssets
         this.status = "ready"
-        console.log("Assets loaded")
+        console.log("(AM) textures loaded")
+        console.log("(AM) textures: ", resolved)
+        return resolved
     }
 
-    getAsset(name: string): LoadedGameAsset | undefined {
-        return this.assets.find(asset => asset.name === name)
+    getTexture(name: string): ResolvedObjectTexture {
+        if (this.status !== "ready") {
+            console.error("Can't getTexture - assetManager has not finished initializing!")
+            return this.fallbackTexture
+        }
+        const found = this.assets.find(asset => asset.name === name)
+        return found ? found : this.fallbackTexture
     }
 
     getStatus(): Status {
