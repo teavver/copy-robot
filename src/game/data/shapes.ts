@@ -35,11 +35,11 @@ export const BASE_GAME_SHAPES: Map<GameShape> = {
         txtName: "Player"
     },
 
-    bulletShape: {
+    projectileShape: {
         size: {
             width: CONSTANTS.PROJECTILE_SIZE_BL,
             height: CONSTANTS.PROJECTILE_SIZE_BL,
         },
-        txtName: "White"
+        txtName: "Yellow"
     }
 }

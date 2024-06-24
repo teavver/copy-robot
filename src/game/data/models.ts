@@ -1,6 +1,7 @@
 import { CharacterData } from "../../classes/base/Character";
-import { ModelParams, ModelState, ModelType } from "../../classes/base/Model";
+import { ModelData, ModelParams, ModelState, ModelType } from "../../classes/base/Model";
 import ENV from "../../environment";
+import { CollisionScope } from "../../types/Collision";
 import { Direction } from "../../types/Direction";
 import { Map } from "../../types/Map";
 import { CONSTANTS } from "../constants";
@@ -18,11 +19,12 @@ export type GameModelParams =
     { cls: "Character", params: [CharacterData, BaseModelParams] }
 
 // Temp here
-const bossCageBase = {
+const bossCageBase: ModelData = {
     type: ModelType.TERRAIN,
     state: ModelState.NORMAL,
     gravityDirection: Direction.NONE,
     displayCollision: ENV.DRAW_COLLISION,
+    collisionScope: { scope: CollisionScope.NONE }
 }
 
 export const BASE_GAME_MODELS: Map<GameModelParams> = {

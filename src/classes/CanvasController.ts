@@ -3,11 +3,13 @@ import { Layer } from "./Layer"
 import { Direction } from "../types/Direction"
 import { PerformanceStats } from "../types/Performance"
 import { logger } from "../game/logger"
-import { Model, ModelParams } from "./base/Model"
+import { Model, ModelParams, ModelState, ModelType } from "./base/Model"
 import { GameModelParams } from "../game/data/models"
 import { Character } from "./base/Character"
 import { assetManager } from "../components/GameCanvas"
 import { Map } from "../types/Map"
+import { blocksToPixels } from "../game/utils"
+import { Projectile } from "./base/Projectile"
 
 export class CanvasController {
 
@@ -139,34 +141,34 @@ export class CanvasController {
         // fg
         this.layers[CONSTANTS.LAYERS.FOREGROUND].simulatePhysics()
 
-        // // PLAYER SHOOT DEMO (WIP)
-        // const player = this.models["Player"] as Character
-        // if (player.data.isShooting) {
-        //     const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
-        //         ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
-        //         : player.pos.x + blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
-        //     const playerBulletPos = {
-        //         x: bulletStartPosX,
-        //         y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
-        //     }
+        // PLAYER SHOOT DEMO (WIP)
+        const player = this.models["Player"] as Character
+        if (player.data.isShooting) {
+            const bulletStartPosX = (player.data.faceDir === Direction.LEFT)
+                ? player.pos.x - blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
+                : player.pos.x + blocksToPixels(CONSTANTS.PLAYER_WIDTH_BL)
+            const playerBulletPos = {
+                x: bulletStartPosX,
+                y: player.pos.y + blocksToPixels(CONSTANTS.PLAYER_HEIGHT_BL / 2),
+            }
 
-        //     const bulletModel = new Projectile({
-        //         owner: player.name,
-        //         startingPos: playerBulletPos,
-        //         targetModelType: ModelType.ENEMY,
-        //         gravityDirection: player.data.faceDir,
+            const bulletModel = new Projectile({
+                owner: player.name,
+                startingPos: playerBulletPos,
+                targetModelType: ModelType.ENEMY,
+                gravityDirection: player.data.faceDir,
 
-        //         onDirectCollision(self: Model, targetModel: Model) {
-        //             self.modifyState(ModelState.DESTROYED)
-        //             if (targetModel instanceof Character) {
-        //                 targetModel.applyDamage(CONSTANTS.HIT_DAMAGE)
-        //             }
-        //         },
-        //     })
+                onDirectCollision(self: Model, targetModel: Model) {
+                    self.modifyState(ModelState.DESTROYED)
+                    if (targetModel instanceof Character) {
+                        targetModel.applyDamage(CONSTANTS.HIT_DAMAGE)
+                    }
+                },
+            })
 
-        //     this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
-        //     player.data.isShooting = false
-        // }
+            this.layers[CONSTANTS.LAYERS.FOREGROUND].addActiveModels([bulletModel])
+            player.data.isShooting = false
+        }
 
         this.layers[CONSTANTS.LAYERS.FOREGROUND].drawActiveModels()
         this.compositeLayers()
