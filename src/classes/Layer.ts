@@ -218,13 +218,13 @@ export class Layer {
         const mShape = model.getShape()
         const mSizePx = blockRectToCanvas(mShape.size)
 
-        if (mShape.txt.type === "Color") {
+        if (mShape.txt.type === "color") {
             // Model with plain color
-            this.context.fillStyle = mShape.txt.txt
+            this.context.fillStyle = mShape.txt.color
             this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         } else {
             // Texture
-            this.context.drawImage(mShape.txt.txt, model.pos.x, model.pos.y)
+            this.context.drawImage(mShape.txt.img, model.pos.x, model.pos.y)
         }
 
         if (model.displayCollision) {

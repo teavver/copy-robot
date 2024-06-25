@@ -5,15 +5,10 @@ export interface SpriteTextureData {
     height: number
 }
 
-type ObjectTextureBase = {
-    name: string
-}
+export type SourceObjectTexture =
+    { type: "color", srcOrColor: string } |                                  // Basic css colorstring (case insensitive) (fillStyle)
+    { type: "image", srcOrColor: string, spriteData?: SpriteTextureData } // Static image or sprite 
 
-export type UnresolvedObjectTexture =
-    | (ObjectTextureBase & { type: "Color", color: string }) // CSS colorstring
-    | (ObjectTextureBase & { type: "Image", src: string })
-
-export type ResolvedObjectTexture =
-    | (ObjectTextureBase & { type: "Color", txt: string })
-    | (ObjectTextureBase & { type: "Image", txt: HTMLImageElement })
-    | (ObjectTextureBase & { type: "Sprite", txt: HTMLImageElement, sData?: SpriteTextureData })
+export type LoadedObjectTexture =
+    { type: "color", color: string } |
+    { type: "image", img: HTMLImageElement, spriteData?: SpriteTextureData }

@@ -32,7 +32,7 @@ export class Projectile extends Model {
             initialPos: data.startingPos,
             shape: {
                 size: BASE_GAME_SHAPES.projectileShape.size,
-                txt: assetManager.getTexture(BASE_GAME_SHAPES.projectileShape.txtName)
+                txt: assetManager.getTexture(BASE_GAME_SHAPES.projectileShape.srcTxt.srcOrColor)
             }
         }
 

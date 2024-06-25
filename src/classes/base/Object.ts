@@ -1,9 +1,9 @@
 import { Size } from "../../types/Size"
-import { ResolvedObjectTexture } from "../../types/Texture"
+import { LoadedObjectTexture } from "../../types/Texture"
 
 export interface ObjectShape {
     size: Size
-    txt: ResolvedObjectTexture
+    txt: LoadedObjectTexture
 }
 
 /**

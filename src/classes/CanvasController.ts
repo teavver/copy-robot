@@ -74,7 +74,7 @@ export class CanvasController {
                         ...gModel.params,
                         shape: {
                             size: gModel.params.shape.size,
-                            txt: assetManager.getTexture(gModel.params.shape.txtName)
+                            txt: assetManager.getTexture(gModel.params.shape.srcTxt.srcOrColor)
                         }
                     }
                     const m = new Model(params)
@@ -86,7 +86,7 @@ export class CanvasController {
                         ...mp,
                         shape: {
                             size: mp.shape.size,
-                            txt: assetManager.getTexture(mp.shape.txtName)
+                            txt: assetManager.getTexture(mp.shape.srcTxt.srcOrColor)
                         }
                     }
                     const c = new Character(gModel.params[0], mParams)
