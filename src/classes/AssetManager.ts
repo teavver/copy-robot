@@ -11,7 +11,7 @@ export class AssetManager {
 
     private fallbackTexture: LoadedObjectTexture = {
         type: "color",
-        color: "pink"
+        color: "lime"
     }
 
     constructor(gameTextures: SourceObjectTexture[]) {
