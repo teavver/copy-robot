@@ -1,3 +1,4 @@
+import { playerSpriteData } from "../../game/data/sprites"
 import { Direction } from "../../types/Direction"
 import { CONSTANTS } from "../../game/constants"
 import { Model, ModelCallbacks, ModelParams, ModelState } from "./Model"
@@ -46,6 +47,13 @@ export class Character extends Model {
         this.addMoveIntent(dir)
         if (dir === Direction.LEFT || dir === Direction.RIGHT) {
             this.data.faceDir = dir
+            if (!this.data.isAirborne) {
+                this.setSpriteData(
+                    playerSpriteData["running"],
+                    dir === Direction.LEFT ? true : false
+                )
+            }
+            return
         }
     }
 
@@ -58,9 +66,14 @@ export class Character extends Model {
         this.data.jumpFrame++
         this.data.isAirborne = true
         this.addMoveIntent(Direction.UP)
+        this.setSpriteData(
+            playerSpriteData["jumping"],
+            this.data.faceDir === Direction.LEFT ? true : false
+        )
     }
 
     private land() {
+        if (!this.data.isAirborne) return
         this.data.jumpFrame = 0
         this.data.isAirborne = false
     }
@@ -75,6 +88,14 @@ export class Character extends Model {
 
         if (this.getCollisionMap().includes(Direction.DOWN)) {
             this.land()
+        }
+
+        // Stand (no movement = reset Sprite to idle)
+        if (this.getMoveIntentMap().length === 0) {
+            this.setSpriteData(
+                playerSpriteData["idle"],
+                this.data.faceDir === Direction.LEFT ? true : false
+            )
         }
 
         // handle jump

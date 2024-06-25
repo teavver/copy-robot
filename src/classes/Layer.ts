@@ -1,6 +1,6 @@
 import { Model, ModelState, ModelType } from "./base/Model"
 import { CollisionRectType, CollisionScope } from "../types/Collision"
-import { areRectsIntersecting, blockRectToCanvas } from "../game/utils"
+import { areRectsIntersecting, blockRectToCanvas, blocksToPixels } from "../game/utils"
 import { CONSTANTS } from "../game/constants"
 import { Position } from "../types/Position"
 import { Size } from "../types/Size"
@@ -224,7 +224,33 @@ export class Layer {
             this.context.fillRect(posX, posY, mSizePx.width, mSizePx.height)
         } else {
             // Texture
-            this.context.drawImage(mShape.txt.img, model.pos.x, model.pos.y)
+            // TODO: Move this ugly part somewhere else
+            if (mShape.sData) {
+                if (mShape.sData.flip) {
+                    this.context.save()
+                    this.context.translate(posX + mSizePx.width, posY)
+                    this.context.scale(-1, 1)
+                    this.context.drawImage(
+                        mShape.txt.img,
+                        mShape.sData.srcX, mShape.sData.srcY,
+                        mShape.sData.width, mShape.sData.height,
+                        0, 0,
+                        mSizePx.width, mSizePx.height
+                    )
+                    this.context.restore()
+                } else {
+                    this.context.drawImage(
+                        mShape.txt.img,
+                        mShape.sData.srcX, mShape.sData.srcY,
+                        mShape.sData.width, mShape.sData.height,
+                        posX, posY,
+                        mSizePx.width, mSizePx.height
+                    )
+                }
+
+            } else {
+                this.context.drawImage(mShape.txt.img, model.pos.x, model.pos.y)
+            }
         }
 
         if (model.displayCollision) {

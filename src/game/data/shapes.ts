@@ -1,7 +1,7 @@
 import { Map } from "../../types/Map";
 import { Size } from "../../types/Size";
 import { SourceObjectTexture } from "../../types/Texture";
-import PlayerImg from "../assets/Player.png"
+import PlayerSprite from "../assets/player_sprite.png"
 import { CONSTANTS } from "../constants";
 
 export interface GameShape {
@@ -34,7 +34,8 @@ export const BASE_GAME_SHAPES: Map<GameShape> = {
             width: CONSTANTS.PLAYER_WIDTH_BL,
             height: CONSTANTS.PLAYER_HEIGHT_BL,
         },
-        srcTxt: { type: "image", srcOrColor: PlayerImg }
+        // srcTxt: { type: "image", srcOrColor: PlayerImg }
+        srcTxt: { type: "image", srcOrColor: PlayerSprite }
     },
 
     projectileShape: {

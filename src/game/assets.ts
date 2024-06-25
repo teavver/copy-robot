@@ -1,6 +1,7 @@
 // asset files
 import { SourceObjectTexture } from "../types/Texture"
-import Player from "./assets/Player.png"
+import PlayerImg from "./assets/Player.png"
+import PlayerSprite from "./assets/player_sprite.png"
 
 
 export const GAME_ASSETS: SourceObjectTexture[] = [
@@ -14,7 +15,11 @@ export const GAME_ASSETS: SourceObjectTexture[] = [
     // Image textures
     {
         type: "image",
-        srcOrColor: Player
+        srcOrColor: PlayerImg
+    },
+    {
+        type: "image",
+        srcOrColor: PlayerSprite
     }
 
 ]

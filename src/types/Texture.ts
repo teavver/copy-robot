@@ -3,12 +3,13 @@ export interface SpriteTextureData {
     srcY: number
     width: number
     height: number
+    flip: boolean
 }
 
 export type SourceObjectTexture =
-    { type: "color", srcOrColor: string } |                                  // Basic css colorstring (case insensitive) (fillStyle)
-    { type: "image", srcOrColor: string, spriteData?: SpriteTextureData } // Static image or sprite 
+    { type: "color", srcOrColor: string } |// Basic css colorstring (case insensitive) (fillStyle)
+    { type: "image", srcOrColor: string } // Static image or sprite 
 
 export type LoadedObjectTexture =
     { type: "color", color: string } |
-    { type: "image", img: HTMLImageElement, spriteData?: SpriteTextureData }
+    { type: "image", img: HTMLImageElement }
